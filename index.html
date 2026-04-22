@@ -1809,6 +1809,7 @@ function agent(id, state, text) {
   }
 }
 
+<script>
 // ── HISTORY ──
 const hist = [];
 
@@ -1898,6 +1899,7 @@ function drawOC() {
     <div><span class="log-ts">${new Date().toLocaleTimeString()}</span><span class="${l.c}">${l.m}</span></div>
   `).join('');
 }
+
 // ── MAIN ──
 async function runPipeline() {
   const err = document.getElementById('errBox');
@@ -1941,7 +1943,6 @@ async function runPipeline() {
     let supp;
     let cust;
 
-    // STEP 1 — COORDINATOR
     agent('coord', 'run');
     log('lc', `Received new sourcing request (${LIVE_MODE ? 'live' : 'demo'} mode)`);
     OC[0].status = 'running';
@@ -1971,7 +1972,6 @@ Respond ONLY in valid JSON:
 
     await delay(350);
 
-    // STEP 2 — SUPPLIER
     agent('supp', 'run');
     log('ls', 'Searching supplier inventory');
     OC[1].status = 'running';
@@ -2003,7 +2003,6 @@ Respond ONLY in valid JSON:
 
     await delay(350);
 
-    // STEP 3 — MATCHING & VERIFICATION
     agent('cust', 'run');
     log('lk', 'Verifying and ranking offers');
     OC[2].status = 'running';
@@ -2067,6 +2066,7 @@ Respond ONLY in valid JSON:
     Find Parts
   `;
 }
+
 function drawResults(offers, req) {
   document.getElementById('resultsWrap').style.display = 'block';
 
@@ -2134,3 +2134,4 @@ function drawResults(offers, req) {
 drawRules();
 drawOC();
 updateModeUI();
+</script>
