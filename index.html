@@ -1,1366 +1,430 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aixinchips — AI-Assisted Semiconductor Sourcing</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+import { useState, useRef } from "react";
 
-:root {
-  --bg: #eef3f9;
-  --white: #ffffff;
-  --surface: #f7f9fc;
-  --surface-2: #f2f6fb;
-  --border: #d8e1ec;
-  --border-strong: #c4d0df;
-  --text: #172131;
-  --text-2: #475569;
-  --muted: #7f8ea3;
-  --navy: #18314f;
-  --navy-2: #23476f;
-  --blue: #196ddb;
-  --blue-2: #dbeafe;
-  --blue-3: #a9c8f8;
-  --green: #15803d;
-  --green-2: #dcfce7;
-  --orange: #b45309;
-  --orange-2: #fff3e6;
-  --red: #b91c1c;
-  --red-2: #fee2e2;
-  --teal: #0f766e;
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
-}
+const MODELS = { coord: "claude-sonnet-4-20250514", supp: "claude-sonnet-4-20250514", cust: "claude-sonnet-4-20250514" };
 
-html { scroll-behavior: smooth; }
-
-body {
-  background: linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%);
-  color: var(--text);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  min-height: 100vh;
-}
-
-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(24, 49, 79, 0.96);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  height: 60px;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.18);
-}
-
-.nav-logo { display: flex; align-items: center; gap: 10px; }
-.nav-logo-mark {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #38bdf8, #22d3ee);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.02em;
-}
-.nav-brand { font-weight: 800; font-size: 17px; color: #fff; letter-spacing: -0.02em; }
-.nav-brand span { color: #38bdf8; }
-.nav-tagline { font-size: 11px; color: rgba(255,255,255,0.38); margin-left: 6px; }
-.nav-tabs { display: flex; gap: 4px; }
-.nav-tab {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 7px;
-  cursor: pointer;
-  color: rgba(255,255,255,0.58);
-  border: none;
-  background: none;
-  transition: 0.15s ease;
-}
-.nav-tab:hover { color: #fff; background: rgba(255,255,255,0.08); }
-.nav-tab.active { color: #fff; background: rgba(255,255,255,0.16); }
-.nav-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #86efac; font-weight: 600; }
-.pulse { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-
-.api-banner {
-  background: #fff8e8;
-  border-bottom: 1px solid #f6d58b;
-  padding: 12px 28px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-  color: #8a4b07;
-  flex-wrap: wrap;
-}
-.api-banner.hidden { display: none; }
-.api-pill {
-  font-size: 11px;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #f5c46b;
-  color: #9a5605;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.api-banner input {
-  flex: 1;
-  min-width: 220px;
-  max-width: 320px;
-  background: #fff;
-  border: 1px solid #f0c46b;
-  border-radius: 7px;
-  padding: 7px 10px;
-  font-size: 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  color: var(--text);
-}
-.api-banner input:focus { outline: none; border-color: #e29a17; }
-.api-save {
-  background: #c77708;
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  padding: 7px 14px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.api-save:hover { background: #a86107; }
-.mode-note { font-size: 11px; color: #9a6a19; }
-
-.page { display: none; padding: 28px; max-width: 1180px; margin: 0 auto; }
-.page.active { display: block; animation: fadeIn 0.22s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-.hero {
-  background: linear-gradient(135deg, #18314f 0%, #23476f 100%);
-  color: #fff;
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: var(--shadow-md);
-  margin-bottom: 18px;
-  overflow: hidden;
-  position: relative;
-}
-.hero::after {
-  content: '';
-  position: absolute;
-  right: -60px;
-  top: -60px;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(56,189,248,0.22) 0%, rgba(56,189,248,0) 70%);
-}
-.hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; position: relative; z-index: 1; }
-.hero-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #93c5fd;
-  margin-bottom: 10px;
-}
-.hero-title { font-size: 32px; line-height: 1.08; font-weight: 800; letter-spacing: -0.03em; max-width: 680px; }
-.hero-sub { margin-top: 12px; font-size: 14px; line-height: 1.7; max-width: 720px; color: rgba(255,255,255,0.82); }
-.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-.hero-btn, .hero-btn-secondary {
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.hero-btn { background: #fff; color: var(--navy); }
-.hero-btn-secondary { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
-.hero-stats { display: grid; grid-template-columns: repeat(3, minmax(110px, 1fr)); gap: 12px; min-width: 320px; }
-.hero-stat {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 14px;
-  padding: 14px;
-}
-.hero-stat-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.56); font-weight: 700; margin-bottom: 6px; }
-.hero-stat-value { font-size: 20px; font-weight: 800; color: #fff; }
-.hero-stat-sub { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 3px; }
-
-.pg-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.pg-title { font-size: 22px; font-weight: 800; color: var(--navy); }
-.pg-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
-
-.card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); }
-.card-hd {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: var(--surface);
-  border-radius: 14px 14px 0 0;
-}
-.card-hd-title { font-size: 12px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 0.06em; }
-.card-bd { padding: 18px; }
-
-.form-group { margin-bottom: 14px; }
-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--text-2);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-input[type=text], input[type=number], input[type=password], textarea, select {
-  width: 100%;
-  background: var(--white);
-  border: 1px solid var(--border-strong);
-  border-radius: 9px;
-  color: var(--text);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13px;
-  padding: 10px 12px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-2); }
-textarea { resize: vertical; min-height: 92px; line-height: 1.5; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-.find-btn, .demo-btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.find-btn { background: var(--blue); color: #fff; margin-top: 6px; }
-.find-btn:hover { background: #145dc0; }
-.find-btn:disabled { background: var(--muted); cursor: not-allowed; }
-.demo-btn { margin-top: 10px; background: var(--surface); color: var(--navy); border: 1px solid var(--border); }
-.demo-btn:hover { background: var(--surface-2); }
-.error-box {
-  background: var(--red-2);
-  border: 1px solid #fca5a5;
-  border-radius: 9px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--red);
-  margin-top: 12px;
-  display: none;
-}
-.error-box.show { display: block; }
-
-.sourcing-grid { display: grid; grid-template-columns: 400px 1fr; gap: 20px; align-items: start; }
-.right-stack { display: grid; gap: 16px; }
-
-@media (max-width: 960px) {
-  .hero-top, .sourcing-grid { grid-template-columns: 1fr; display: grid; }
-  .hero-stats { grid-template-columns: repeat(3, 1fr); min-width: unset; }
-}
-
-@media (max-width: 720px) {
-  nav { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 10px; }
-  .page { padding: 18px 16px; }
-  .form-row, .hero-stats, .info-grid, .result-card { grid-template-columns: 1fr; }
-  .nav-tabs { width: 100%; overflow-x: auto; }
-  .sourcing-grid { grid-template-columns: 1fr; }
-  .res-right { text-align: left; align-items: flex-start; }
-}
-
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.info-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); padding: 16px; }
-.info-title { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--navy); margin-bottom: 10px; }
-.info-list { display: grid; gap: 8px; }
-.info-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-2); line-height: 1.55; }
-.info-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: var(--blue); }
-.pipeline-list { display: grid; gap: 10px; }
-.pipeline-step { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
-.pipeline-num {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--blue-2);
-  color: var(--blue);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-.pipeline-text { font-size: 13px; color: var(--text-2); }
-
-.agent-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: var(--shadow-sm); }
-.agent-card.running { border-color: var(--blue-3); box-shadow: 0 0 0 3px var(--blue-2); }
-.agent-card.finished { border-color: #86efac; }
-.agent-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
-.agent-ico { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.agent-info { flex: 1; }
-.agent-name { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
-.agent-role { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
-.agent-badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.04em; }
-.b-idle { background: var(--surface); color: var(--muted); }
-.b-run  { background: var(--blue-2); color: var(--blue); }
-.b-done { background: var(--green-2); color: var(--green); }
-.agent-out { border-top: 1px solid var(--border); padding: 12px 16px; font-size: 12px; color: var(--text-2); line-height: 1.6; background: var(--surface); display: none; }
-.agent-card.has-out .agent-out { display: block; }
-.dots { display: flex; gap: 4px; align-items: center; }
-.dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); animation: bounce 0.8s infinite; }
-.dots span:nth-child(2) { animation-delay: .15s; }
-.dots span:nth-child(3) { animation-delay: .3s; }
-@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-
-.results-wrap { margin-top: 2px; }
-.sec-label { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
-.result-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 18px;
-  margin-bottom: 10px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 16px;
-  animation: fadeIn 0.3s ease both;
-  box-shadow: var(--shadow-sm);
-}
-.result-card:hover { box-shadow: var(--shadow-md); }
-.result-card.r1 { border-left: 4px solid var(--green); }
-.result-card.r2 { border-left: 4px solid var(--blue); }
-.result-card.r3 { border-left: 4px solid var(--border-strong); }
-.res-rank { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-.r1 .res-rank { color: var(--green); }
-.r2 .res-rank { color: var(--blue); }
-.r3 .res-rank { color: var(--muted); }
-.res-supplier { font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 3px; }
-.res-part { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--blue); margin-bottom: 10px; }
-.res-meta { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 8px; }
-.rmi { font-size: 12px; color: var(--text-2); }
-.rmi strong { color: var(--text); font-weight: 800; }
-.res-flags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.rflag { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
-.rflag-ok   { background: var(--green-2); color: var(--green); }
-.rflag-warn { background: var(--orange-2); color: var(--orange); }
-.res-reason { font-size: 11px; color: var(--muted); font-style: italic; padding-top: 8px; border-top: 1px solid var(--border); line-height: 1.5; }
-.res-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; min-width: 120px; }
-.res-price { font-size: 24px; font-weight: 800; color: var(--navy); }
-.res-price-sub { font-size: 11px; color: var(--muted); margin-top: -4px; }
-.res-total { font-size: 12px; font-weight: 700; color: var(--text-2); }
-.conf-label { font-size: 10px; color: var(--muted); font-weight: 700; }
-.conf-bar-wrap { width: 86px; height: 5px; background: var(--border); border-radius: 999px; }
-.conf-bar { height: 100%; border-radius: 999px; }
-
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border); }
-.data-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
-.data-table tr:last-child td { border-bottom: none; }
-.data-table tbody tr:hover td { background: var(--surface); }
-.mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
-.spill { font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
-.sp-done { background: var(--green-2); color: var(--green); }
-.sp-rev  { background: var(--orange-2); color: var(--orange); }
-.sp-pend { background: var(--blue-2); color: var(--blue); }
-
-.rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-.rule-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow-sm); }
-.rule-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 12px; }
-.rule-name { font-size: 13px; font-weight: 800; color: var(--navy); }
-.rule-desc { font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 10px; }
-.rule-type-pill { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 6px; }
-.rt-r { background: var(--red-2); color: var(--red); }
-.rt-f { background: var(--orange-2); color: var(--orange); }
-.rt-q { background: var(--blue-2); color: var(--blue); }
-.tog { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
-.tog input { opacity: 0; width: 0; height: 0; }
-.tog-sl { position: absolute; inset: 0; border-radius: 11px; cursor: pointer; background: var(--border-strong); transition: .2s; }
-.tog-sl::before {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  top: 3px;
-  left: 3px;
-  transition: .2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-.tog input:checked + .tog-sl { background: var(--blue); }
-.tog input:checked + .tog-sl::before { transform: translateX(18px); }
-
-.oc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 20px; }
-.oc-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); }
-.oc-hd { background: var(--navy); padding: 13px 16px; display: flex; align-items: center; gap: 10px; }
-.oc-hd-name { font-size: 13px; font-weight: 800; color: #fff; }
-.oc-hd-host { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.38); }
-.oc-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--border); font-size: 12px; }
-.oc-row:last-child { border-bottom: none; }
-.oc-row-k { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.oc-row-v { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text); }
-.oc-live { color: var(--green); font-weight: 800; }
-.oc-idle { color: var(--muted); }
-.oc-log-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-sm); }
-.oc-log-hd { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface); font-size: 11px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 0.05em; }
-.oc-log { padding: 12px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.95; max-height: 220px; overflow-y: auto; }
-.log-ts { color: var(--muted); margin-right: 10px; }
-.lc { color: var(--blue); }
-.ls { color: var(--orange); }
-.lk { color: var(--green); }
-.ly { color: var(--teal); }
-</style>
-</head>
-<body>
-
-<nav>
-  <div class="nav-logo">
-    <div class="nav-logo-mark">AI</div>
-    <div class="nav-brand">aixin<span>chips</span></div>
-    <span class="nav-tagline">AI semiconductor sourcing · Singapore</span>
-  </div>
-
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="goPage('sourcing',this)">Sourcing</button>
-    <button class="nav-tab" onclick="goPage('history',this)">History</button>
-    <button class="nav-tab" onclick="goPage('rules',this)">Rules</button>
-    <button class="nav-tab" onclick="goPage('openclaw',this)">OpenClaw</button>
-  </div>
-
-  <div class="nav-right">
-    <div class="pulse"></div>
-    <span>3 agents online</span>
-  </div>
-</nav>
-
-<div class="api-banner" id="apiBanner">
-  <span class="api-pill">Optional live mode</span>
-  <strong>Anthropic API key:</strong>
-  <input type="password" id="apiInput" placeholder="sk-ant-api03-…" />
-  <button class="api-save" onclick="saveKey()">Activate Live Mode</button>
-  <span class="mode-note">Without a key, the site runs in demo mode.</span>
-</div>
-
-<div class="page active" id="page-sourcing">
-  <section class="hero">
-    <div class="hero-top">
-      <div>
-        <div class="hero-kicker"><span>Multi-agent sourcing workflow</span></div>
-        <div class="hero-title">AI-assisted semiconductor sourcing with rule-checked recommendations</div>
-        <div class="hero-sub">
-          Submit a semiconductor request, compare supplier offers, and return validated sourcing options through a structured multi-agent pipeline. Built for exact-match-first sourcing, verification, and human-review escalation.
-        </div>
-        <div class="hero-actions">
-          <button class="hero-btn" type="button" onclick="loadSampleRequest()">Run sample demo</button>
-          <button class="hero-btn-secondary" type="button" onclick="goPage('rules', document.querySelectorAll('.nav-tab')[2])">View verification rules</button>
-        </div>
-      </div>
-
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-label">Agents</div>
-          <div class="hero-stat-value">3</div>
-          <div class="hero-stat-sub">Coordinator, Supplier, Verification</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-label">Mode</div>
-          <div class="hero-stat-value" id="modeValue">Demo</div>
-          <div class="hero-stat-sub">Public demo safe by default</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-label">Output</div>
-          <div class="hero-stat-value">Top 3</div>
-          <div class="hero-stat-sub">Ranked sourcing options</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="pg-head">
-    <div>
-      <div class="pg-title">Semiconductor Sourcing</div>
-      <div class="pg-sub">Exact-match-first request intake, supplier search, verification, and recommendation output</div>
-    </div>
-  </div>
-
-  <div class="sourcing-grid">
-    <div>
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-hd-title">New Sourcing Request</div>
-        </div>
-
-        <div class="card-bd">
-          <div class="form-group">
-            <label>Describe what you need</label>
-            <textarea id="fFree" rows="4" placeholder="e.g. Need 5,000 STM32F103C8T6, LQFP-48, within 4 weeks, authentic only, max $3.50/unit"></textarea>
-            <div class="form-hint">Use natural language, or fill the structured fields below.</div>
-          </div>
-
-          <div class="form-row form-group">
-            <div>
-              <label>Part Number (MPN)</label>
-              <input id="fMPN" type="text" placeholder="STM32F103C8T6">
-            </div>
-            <div>
-              <label>Quantity</label>
-              <input id="fQty" type="number" placeholder="5000">
-            </div>
-          </div>
-
-          <div class="form-row form-group">
-            <div>
-              <label>Max Unit Price (USD)</label>
-              <input id="fPrice" type="number" step="0.01" placeholder="3.50">
-            </div>
-            <div>
-              <label>Lead Time Required</label>
-              <select id="fLead">
-                <option value="">Any</option>
-                <option value="1">Within 1 week</option>
-                <option value="2">Within 2 weeks</option>
-                <option value="4">Within 4 weeks</option>
-                <option value="8">Within 8 weeks</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row form-group">
-            <div>
-              <label>Package Type</label>
-              <input id="fPkg" type="text" placeholder="LQFP-48, QFN-32, SOT-223">
-            </div>
-            <div>
-              <label>Special Requirements</label>
-              <input id="fNotes" type="text" placeholder="RoHS, authentic only, approved distributor">
-            </div>
-          </div>
-
-          <button class="find-btn" id="findBtn" onclick="runPipeline()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
-            Find Parts
-          </button>
-
-          <button class="demo-btn" type="button" onclick="loadSampleRequest()">Load Sample Request</button>
-          <div class="error-box" id="errBox"></div>
-        </div>
-      </div>
-
-      <div style="height:16px"></div>
-
-      <div class="info-grid">
-        <div class="info-card">
-          <div class="info-title">How recommendations are validated</div>
-          <div class="info-list">
-            <div class="info-item"><span class="info-dot"></span><span>Exact part-number and package compatibility checked first</span></div>
-            <div class="info-item"><span class="info-dot"></span><span>Supplier approval and authenticity rules enforced</span></div>
-            <div class="info-item"><span class="info-dot"></span><span>Missing lead-time and suspicious pricing flagged</span></div>
-            <div class="info-item"><span class="info-dot"></span><span>Low-confidence cases should be routed to review</span></div>
-          </div>
-        </div>
-
-        <div class="info-card">
-          <div class="info-title">Pipeline overview</div>
-          <div class="pipeline-list">
-            <div class="pipeline-step"><div class="pipeline-num">1</div><div class="pipeline-text">Parse and structure request</div></div>
-            <div class="pipeline-step"><div class="pipeline-num">2</div><div class="pipeline-text">Search supplier offers</div></div>
-            <div class="pipeline-step"><div class="pipeline-num">3</div><div class="pipeline-text">Verify rules and reject invalid offers</div></div>
-            <div class="pipeline-step"><div class="pipeline-num">4</div><div class="pipeline-text">Rank top sourcing options</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="right-stack">
-      <div class="agent-card" id="ac-coord">
-        <div class="agent-top">
-          <div class="agent-ico" style="background:var(--blue-2)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
-            </svg>
-          </div>
-          <div class="agent-info">
-            <div class="agent-name" style="color:var(--blue)">Coordinator Agent</div>
-            <div class="agent-role">Parses request · validates required fields · orchestrates the pipeline</div>
-          </div>
-          <div class="agent-badge b-idle" id="b-coord">Idle</div>
-        </div>
-        <div class="agent-out" id="o-coord"></div>
-      </div>
-
-      <div class="agent-card" id="ac-supp">
-        <div class="agent-top">
-          <div class="agent-ico" style="background:var(--orange-2)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="M21 21l-4.35-4.35"/>
-            </svg>
-          </div>
-          <div class="agent-info">
-            <div class="agent-name" style="color:var(--orange)">Supplier Agent</div>
-            <div class="agent-role">Searches supplier inventory · normalizes offers · returns candidate records</div>
-          </div>
-          <div class="agent-badge b-idle" id="b-supp">Idle</div>
-        </div>
-        <div class="agent-out" id="o-supp"></div>
-      </div>
-
-      <div class="agent-card" id="ac-cust">
-        <div class="agent-top">
-          <div class="agent-ico" style="background:var(--green-2)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.2">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-          </div>
-          <div class="agent-info">
-            <div class="agent-name" style="color:var(--green)">Matching & Verification Agent</div>
-            <div class="agent-role">Applies rules · ranks valid offers · explains recommendations</div>
-          </div>
-          <div class="agent-badge b-idle" id="b-cust">Idle</div>
-        </div>
-        <div class="agent-out" id="o-cust"></div>
-      </div>
-
-      <div class="results-wrap" id="resultsWrap" style="display:none">
-        <div class="sec-label">Sourcing Results</div>
-        <div id="resultCards"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="page" id="page-history">
-  <div class="pg-head">
-    <div>
-      <div class="pg-title">Request History</div>
-      <div class="pg-sub">All sourcing requests processed by the platform</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Part Number</th>
-          <th>Qty</th>
-          <th>Best Price</th>
-          <th>Lead Time</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="histBody">
-        <tr>
-          <td colspan="6" style="text-align:center;padding:40px;color:var(--muted);font-size:13px">No requests yet</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="page" id="page-rules">
-  <div class="pg-head">
-    <div>
-      <div class="pg-title">Verification Rules</div>
-      <div class="pg-sub">Rules that filter, flag, or downgrade supplier offers before any recommendation is shown</div>
-    </div>
-  </div>
-  <div class="rules-grid" id="rulesGrid"></div>
-</div>
-
-<div class="page" id="page-openclaw">
-  <div class="pg-head">
-    <div>
-      <div class="pg-title">OpenClaw Agent Network</div>
-      <div class="pg-sub">Live node view for the sourcing workflow orchestration layer</div>
-    </div>
-  </div>
-
-  <div class="oc-grid" id="ocGrid"></div>
-
-  <div class="oc-log-card">
-    <div class="oc-log-hd">Live Activity Log</div>
-    <div class="oc-log" id="ocLog"></div>
-  </div>
-</div>
-
-<script>
-let KEY = '';
-let LIVE_MODE = false;
-
-function updateModeUI() {
-  const modeValue = document.getElementById('modeValue');
-  const banner = document.getElementById('apiBanner');
-  if (modeValue) modeValue.textContent = LIVE_MODE ? 'Live' : 'Demo';
-  if (banner) banner.classList.toggle('hidden', LIVE_MODE);
-}
-
-function log(c, m) {
-  LOGS.push({ c, m });
-}
-
-function saveKey() {
-  const v = document.getElementById('apiInput').value.trim();
-  if (!v.startsWith('sk-')) {
-    alert('Please enter a valid Anthropic API key.');
-    return;
-  }
-  KEY = v;
-  LIVE_MODE = true;
-  sessionStorage.setItem('aix_key', v);
-  updateModeUI();
-  log('ly', 'Live mode activated with Anthropic API key');
-}
-
-(function initMode() {
-  const k = sessionStorage.getItem('aix_key');
-  if (k) {
-    KEY = k;
-    LIVE_MODE = true;
-  }
-  updateModeUI();
-})();
-
-function loadSampleRequest() {
-  document.getElementById('fFree').value = 'Need 5000 STM32F103C8T6, LQFP-48, within 4 weeks, authentic only, max $3.50/unit';
-  document.getElementById('fMPN').value = 'STM32F103C8T6';
-  document.getElementById('fQty').value = '5000';
-  document.getElementById('fPrice').value = '3.50';
-  document.getElementById('fLead').value = '4';
-  document.getElementById('fPkg').value = 'LQFP-48';
-  document.getElementById('fNotes').value = 'Authentic only, approved distributor, RoHS';
-  const err = document.getElementById('errBox');
-  err.classList.remove('show');
-  err.textContent = '';
-}
-
-const DEMO_SUPPLIERS = [
-  {
-    supplier: 'Digi-Key',
-    approvedSupplier: true,
-    authentic: true,
-    reliability: 0.96,
-    offers: [
-      { partNumber: 'STM32F103C8T6', packaging: 'LQFP-48', unitPrice: 3.42, stockQty: 6200, leadTimeWeeks: 2, moq: 1, lifecycle: 'ACTIVE' }
-    ]
-  },
-  {
-    supplier: 'Mouser Electronics',
-    approvedSupplier: true,
-    authentic: true,
-    reliability: 0.95,
-    offers: [
-      { partNumber: 'STM32F103C8T6', packaging: 'LQFP-48', unitPrice: 3.48, stockQty: 9000, leadTimeWeeks: 3, moq: 1, lifecycle: 'ACTIVE' }
-    ]
-  },
-  {
-    supplier: 'Arrow Electronics',
-    approvedSupplier: true,
-    authentic: true,
-    reliability: 0.92,
-    offers: [
-      { partNumber: 'STM32F103C8T6', packaging: 'LQFP-48', unitPrice: 3.31, stockQty: 4100, leadTimeWeeks: 4, moq: 250, lifecycle: 'ACTIVE' }
-    ]
-  },
-  {
-    supplier: 'Future Electronics',
-    approvedSupplier: true,
-    authentic: true,
-    reliability: 0.90,
-    offers: [
-      { partNumber: 'STM32F103C8T6', packaging: 'LQFP-48', unitPrice: 3.60, stockQty: 7000, leadTimeWeeks: 5, moq: 100, lifecycle: 'ACTIVE' }
-    ]
-  },
-  {
-    supplier: 'GreyMarket Hub',
-    approvedSupplier: false,
-    authentic: false,
-    reliability: 0.35,
-    offers: [
-      { partNumber: 'STM32F103C8T6', packaging: 'LQFP-48', unitPrice: 2.05, stockQty: 15000, leadTimeWeeks: 1, moq: 500, lifecycle: 'UNKNOWN' }
-    ]
-  }
-];
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function toNumber(value, fallback = 0) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function normalizePackage(value) {
-  return (value || '').trim().toUpperCase().replace(/\s+/g, '');
-}
-
-function safeUpper(value) {
-  return (value || '').trim().toUpperCase();
-}
-
-async function ai(system, user) {
-  if (!LIVE_MODE || !KEY) throw new Error('Live mode is not active.');
-
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
+async function ai(apiKey, system, user) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
     },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system,
-      messages: [{ role: 'user', content: user }]
-    })
+    body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system, messages: [{ role: "user", content: user }] }),
   });
-
-  if (!r.ok) {
-    const e = await r.json().catch(() => ({}));
-    throw new Error(e?.error?.message || `HTTP ${r.status}`);
-  }
-
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e?.error?.message || `HTTP ${r.status}`); }
   const d = await r.json();
-  const t = (d.content || []).map(c => c.text || '').join('');
-  try {
-    return JSON.parse(t.replace(/```json|```/g, '').trim());
-  } catch {
-    return { raw: t };
-  }
+  const t = (d.content || []).map((c) => c.text || "").join("");
+  try { return JSON.parse(t.replace(/```json|```/g, "").trim()); } catch { return { raw: t }; }
 }
 
-function parseRequestDemo({ free, mpn, qty, price, lead, pkg, notes }) {
-  const text = `${free} ${notes}`.trim();
-  const upper = text.toUpperCase();
+const TABS = ["Sourcing", "History", "Rules", "OpenClaw"];
 
-  let detectedMPN = mpn || '';
-  if (!detectedMPN) {
-    const mpnMatch = upper.match(/\b[A-Z0-9]{6,}\b/);
-    if (mpnMatch) detectedMPN = mpnMatch[0];
-  }
+const DEFAULT_RULES = [
+  { name: "Reject unapproved suppliers", desc: "Only verified, approved suppliers may appear in results.", type: "REJECT", on: true },
+  { name: "Reject obsolete parts", desc: "Parts with NRND or EOL lifecycle status are excluded.", type: "REJECT", on: true },
+  { name: "Require lead time data", desc: "Offers without a confirmed lead time are excluded.", type: "REQUIRE", on: true },
+  { name: "Flag low-price outliers", desc: "Prices 40%+ below market average are flagged as suspect.", type: "FLAG", on: true },
+  { name: "Reject packaging mismatch", desc: "Package type must match the requested specification.", type: "REJECT", on: true },
+  { name: "Flag unverified authenticity", desc: "Offers without authenticity guarantee flagged for review.", type: "FLAG", on: true },
+  { name: "Require minimum stock", desc: "Offers below requested quantity are ranked lower.", type: "REQUIRE", on: false },
+  { name: "Block grey market brokers", desc: "Non-listed distributors are automatically rejected.", type: "REJECT", on: true },
+];
 
-  let detectedQty = toNumber(qty, 0);
-  if (!detectedQty) {
-    const qtyMatch = text.match(/\b(\d{2,7})\b/);
-    if (qtyMatch) detectedQty = Number(qtyMatch[1]);
-  }
+const OC_NODES = [
+  { label: "CO", name: "Coordinator Node", host: "openclaw-1 · port 3001" },
+  { label: "SU", name: "Supplier Node", host: "openclaw-2 · port 3002" },
+  { label: "CU", name: "Customer Node", host: "openclaw-3 · port 3003" },
+];
 
-  let detectedPrice = toNumber(price, 0);
-  if (!detectedPrice) {
-    const priceMatch = text.match(/\$ ?(\d+(\.\d+)?)/);
-    if (priceMatch) detectedPrice = Number(priceMatch[1]);
-  }
+// ── TINY COMPONENTS ──
+const Label = ({ children }) => (
+  <div style={{ fontSize: 11, fontWeight: 700, color: "#4a5568", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>{children}</div>
+);
 
-  let detectedLead = toNumber(lead, 0);
-  if (!detectedLead) {
-    const leadMatch = upper.match(/(\d+)\s*WEEK/);
-    if (leadMatch) detectedLead = Number(leadMatch[1]);
-  }
+const Input = ({ ...p }) => (
+  <input {...p} style={{ width: "100%", background: "#fff", border: "1px solid #c5cfe0", borderRadius: 7, color: "#1a2332", fontFamily: "inherit", fontSize: 13, padding: "8px 11px" }} />
+);
 
-  let detectedPkg = pkg || '';
-  if (!detectedPkg) {
-    const pkgMatch = upper.match(/\b(LQFP-\d+|QFN-\d+|BGA-\d+|SOT-\d+|SOIC-\d+|TQFP-\d+)\b/);
-    if (pkgMatch) detectedPkg = pkgMatch[1];
-  }
+const Select = ({ children, ...p }) => (
+  <select {...p} style={{ width: "100%", background: "#fff", border: "1px solid #c5cfe0", borderRadius: 7, color: "#1a2332", fontFamily: "inherit", fontSize: 13, padding: "8px 11px" }}>{children}</select>
+);
 
-  return {
-    partNumber: detectedMPN || 'UNKNOWN-PART',
-    manufacturer: detectedMPN.startsWith('STM32') ? 'STMicroelectronics' : '',
-    quantity: detectedQty || 1,
-    maxUnitPrice: detectedPrice || 0,
-    leadTimeWeeks: detectedLead || 0,
-    packageType: detectedPkg || '',
-    notes: notes || free || '',
-    urgency: detectedLead && detectedLead <= 2 ? 'high' : 'normal',
-    supplierQuery: `${detectedMPN || ''} ${detectedPkg || ''}`.trim()
+const Pill = ({ children, color = "gray" }) => {
+  const map = { green: ["#dcfce7","#16a34a"], blue: ["#e6f0fc","#1a6fd8"], orange: ["#fff0e0","#c05a00"], red: ["#fee2e2","#b91c1c"], gray: ["#f0f3f8","#8a9ab0"], purple: ["#ede9fe","#7c3aed"] };
+  const [bg, fg] = map[color] || map.gray;
+  return <span style={{ background: bg, color: fg, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, letterSpacing: "0.04em", fontFamily: "monospace", whiteSpace: "nowrap" }}>{children}</span>;
+};
+
+const CardWrap = ({ children, style }) => (
+  <div style={{ background: "#fff", border: "1px solid #dde3ed", borderRadius: 10, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", ...style }}>{children}</div>
+);
+
+const CardHead = ({ children }) => (
+  <div style={{ padding: "13px 18px", borderBottom: "1px solid #dde3ed", background: "#f7f9fc", borderRadius: "10px 10px 0 0", fontSize: 12, fontWeight: 700, color: "#1e3a5f", textTransform: "uppercase", letterSpacing: "0.05em" }}>{children}</div>
+);
+
+function AgentRow({ label, role, status, output, accent, bg }) {
+  const iconMap = {
+    coord: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>,
+    supp:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>,
+    cust:  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
   };
-}
-
-function supplierSearchDemo(coord) {
-  const part = safeUpper(coord.partNumber);
-  const pkg = normalizePackage(coord.packageType);
-  const qty = toNumber(coord.quantity, 1);
-  const maxPrice = toNumber(coord.maxUnitPrice, 0);
-  const lead = toNumber(coord.leadTimeWeeks, 0);
-  const offers = [];
-
-  DEMO_SUPPLIERS.forEach(source => {
-    source.offers.forEach(offer => {
-      if (safeUpper(offer.partNumber) !== part) return;
-
-      offers.push({
-        supplier: source.supplier,
-        unitPrice: offer.unitPrice,
-        stockQty: offer.stockQty,
-        leadTimeWeeks: offer.leadTimeWeeks,
-        moq: offer.moq,
-        packaging: offer.packaging,
-        authentic: source.authentic,
-        approvedSupplier: source.approvedSupplier,
-        reliability: source.reliability,
-        lifecycle: offer.lifecycle,
-        packageMismatch: pkg && normalizePackage(offer.packaging) !== pkg,
-        priceTooHigh: maxPrice > 0 && offer.unitPrice > maxPrice,
-        leadTooSlow: lead > 0 && offer.leadTimeWeeks > lead,
-        insufficientStock: offer.stockQty < qty
-      });
-    });
-  });
-
-  return { offers };
-}
-
-const RULES = [
-  { n: 'Reject unapproved suppliers',    d: 'Only verified, approved suppliers may appear in results.', t: 'reject', on: true },
-  { n: 'Reject obsolete parts',          d: 'Parts with NRND or EOL lifecycle status are excluded.',     t: 'reject', on: true },
-  { n: 'Require lead time data',         d: 'Offers without confirmed lead time are excluded.',           t: 'require', on: true },
-  { n: 'Flag low-price outliers',        d: 'Prices materially below expected range are flagged as suspect.', t: 'flag', on: true },
-  { n: 'Reject packaging mismatch',      d: 'Package type must match the requested specification.',       t: 'reject', on: true },
-  { n: 'Flag unverified authenticity',   d: 'Offers without authenticity assurance are flagged for review.', t: 'flag', on: true },
-  { n: 'Require minimum stock coverage', d: 'Offers below requested quantity are ranked lower.',          t: 'require', on: false },
-  { n: 'Block grey market brokers',      d: 'Non-listed distributors are automatically rejected.',        t: 'reject', on: true }
-];
-
-function evaluateOffersDemo(coord, supp) {
-  const qty = toNumber(coord.quantity, 1);
-  const maxPrice = toNumber(coord.maxUnitPrice, 0);
-  const leadReq = toNumber(coord.leadTimeWeeks, 0);
-  const pkgReq = normalizePackage(coord.packageType);
-
-  const rankedOffers = (supp.offers || []).map(o => {
-    const flags = [];
-    const warns = [];
-    let rejected = false;
-    let score = 100;
-
-    if (RULES[0].on && !o.approvedSupplier) {
-      rejected = true;
-      flags.push('UNAPPROVED');
-    }
-    if (RULES[1].on && ['NRND', 'EOL'].includes((o.lifecycle || '').toUpperCase())) {
-      rejected = true;
-      flags.push('OBSOLETE');
-    }
-    if (RULES[2].on && !o.leadTimeWeeks) {
-      rejected = true;
-      flags.push('NO_LEAD_TIME');
-    }
-    if (RULES[4].on && pkgReq && normalizePackage(o.packaging) !== pkgReq) {
-      rejected = true;
-      flags.push('PKG_MISMATCH');
-    }
-    if (RULES[5].on && !o.authentic) {
-      warns.push('UNVERIFIED_AUTH');
-      score -= 25;
-    }
-    if (RULES[7].on && !o.approvedSupplier) {
-      rejected = true;
-      flags.push('GREY_MARKET');
-    }
-    if (maxPrice > 0 && o.unitPrice > maxPrice) {
-      warns.push('OVER_BUDGET');
-      score -= 14;
-    }
-    if (leadReq > 0 && o.leadTimeWeeks > leadReq) {
-      warns.push('SLOW_LEAD');
-      score -= 12;
-    }
-    if (o.stockQty < qty) {
-      warns.push('LOW_STOCK');
-      score -= 10;
-    }
-    if (o.moq > qty) {
-      warns.push('MOQ_HIGH');
-      score -= 8;
-    }
-
-    score -= Math.max(0, (o.unitPrice - 3.2) * 10);
-    score += Math.min(12, Math.floor((o.reliability || 0.8) * 10));
-    score = Math.max(5, Math.min(98, score));
-
-    const totalCost = o.unitPrice * qty;
-    const confidence = score / 100;
-    const ruleFlags = [o.authentic ? 'AUTHENTIC' : null, o.approvedSupplier ? 'APPROVED' : null, ...warns].filter(Boolean);
-
-    let reason = `Matched ${coord.partNumber || 'requested part'} from ${o.supplier}.`;
-    if (o.stockQty >= qty) reason += ' Stock covers requested quantity.';
-    if (leadReq > 0 && o.leadTimeWeeks <= leadReq) reason += ' Lead time meets requirement.';
-    if (maxPrice > 0 && o.unitPrice <= maxPrice) reason += ' Unit price is within budget.';
-    if (warns.length) reason += ` Review flags: ${warns.join(', ')}.`;
-    if (flags.length) reason += ` Rejection triggers: ${flags.join(', ')}.`;
-
-    return {
-      rank: 0,
-      supplier: o.supplier,
-      unitPrice: o.unitPrice,
-      stockQty: o.stockQty,
-      leadTimeWeeks: o.leadTimeWeeks,
-      moq: o.moq,
-      totalCost,
-      confidence,
-      matchType: 'exact',
-      ruleFlags,
-      reason,
-      rejected,
-      rejectionReasons: flags,
-      reliability: o.reliability
-    };
-  });
-
-  rankedOffers.sort((a, b) => {
-    if (a.rejected !== b.rejected) return a.rejected - b.rejected;
-    return b.confidence - a.confidence;
-  });
-
-  rankedOffers.forEach((item, idx) => {
-    item.rank = idx + 1;
-  });
-
-  return { rankedOffers };
-}
-
-function goPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (id === 'openclaw') drawOC();
-}
-
-function agent(id, state, text) {
-  const card = document.getElementById('ac-' + id);
-  const badge = document.getElementById('b-' + id);
-  const out = document.getElementById('o-' + id);
-
-  card.classList.remove('running', 'finished', 'has-out');
-
-  if (state === 'run') {
-    card.classList.add('running', 'has-out');
-    badge.className = 'agent-badge b-run';
-    badge.textContent = 'Processing…';
-    out.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
-  } else if (state === 'done') {
-    card.classList.add('finished');
-    badge.className = 'agent-badge b-done';
-    badge.textContent = 'Done';
-    if (text) {
-      out.textContent = text;
-      card.classList.add('has-out');
-    }
-  } else {
-    badge.className = 'agent-badge b-idle';
-    badge.textContent = 'Idle';
-  }
-}
-
-const hist = [];
-
-function addHist(h) {
-  hist.unshift(h);
-  document.getElementById('histBody').innerHTML = hist.map(x => `
-    <tr>
-      <td class="mono" style="color:var(--muted)">${x.time}</td>
-      <td class="mono" style="color:var(--blue)">${x.mpn || '—'}</td>
-      <td>${x.qty || '—'}</td>
-      <td style="color:var(--green);font-weight:700">${x.price ? '$' + x.price : '—'}</td>
-      <td>${x.lead ? x.lead + ' wk' : '—'}</td>
-      <td><span class="spill ${x.status === 'Complete' ? 'sp-done' : x.status === 'Review' ? 'sp-rev' : 'sp-pend'}">${x.status}</span></td>
-    </tr>
-  `).join('');
-}
-
-function drawRules() {
-  document.getElementById('rulesGrid').innerHTML = RULES.map((r, i) => `
-    <div class="rule-card">
-      <div class="rule-card-top">
-        <div class="rule-name">${r.n}</div>
-        <label class="tog">
-          <input type="checkbox" ${r.on ? 'checked' : ''} onchange="RULES[${i}].on=this.checked">
-          <span class="tog-sl"></span>
-        </label>
-      </div>
-      <div class="rule-desc">${r.d}</div>
-      <span class="rule-type-pill ${r.t === 'reject' ? 'rt-r' : r.t === 'flag' ? 'rt-f' : 'rt-q'}">${r.t.toUpperCase()}</span>
-    </div>
-  `).join('');
-}
-
-const OC = [
-  { ico: 'C', name: 'Coordinator Node', host: 'openclaw-1 · port 3001', model: 'claude-sonnet-4-6', req: 0, status: 'standby' },
-  { ico: 'S', name: 'Supplier Node', host: 'openclaw-2 · port 3002', model: 'claude-sonnet-4-6', req: 0, status: 'standby' },
-  { ico: 'V', name: 'Verification Node', host: 'openclaw-3 · port 3003', model: 'claude-sonnet-4-6', req: 0, status: 'standby' }
-];
-
-const LOGS = [
-  { c: 'ly', m: 'OpenClaw gateway started — port 3001' },
-  { c: 'ly', m: 'Skill loaded: aixinchips-sourcing v2.0' },
-  { c: 'lc', m: 'Coordinator Agent ready' },
-  { c: 'ls', m: 'Supplier Agent ready' },
-  { c: 'lk', m: 'Matching & Verification Agent ready' }
-];
-
-const T0 = Date.now();
-
-function drawOC() {
-  const s = Math.floor((Date.now() - T0) / 1000);
-  document.getElementById('ocGrid').innerHTML = OC.map(o => `
-    <div class="oc-card">
-      <div class="oc-hd">
-        <div style="width:32px;height:32px;background:rgba(255,255,255,0.12);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">${o.ico}</div>
-        <div>
-          <div class="oc-hd-name">${o.name}</div>
-          <div class="oc-hd-host">${o.host}</div>
-        </div>
-      </div>
-      <div class="oc-row"><span class="oc-row-k">Status</span><span class="oc-row-v ${o.status === 'running' ? 'oc-live' : 'oc-idle'}">${o.status === 'running' ? '● Running' : '● Standby'}</span></div>
-      <div class="oc-row"><span class="oc-row-k">Model</span><span class="oc-row-v">${o.model}</span></div>
-      <div class="oc-row"><span class="oc-row-k">Requests</span><span class="oc-row-v">${o.req}</span></div>
-      <div class="oc-row"><span class="oc-row-k">Uptime</span><span class="oc-row-v">${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s</span></div>
-    </div>
-  `).join('');
-
-  document.getElementById('ocLog').innerHTML = LOGS.slice(-40).map(l => `
-    <div><span class="log-ts">${new Date().toLocaleTimeString()}</span><span class="${l.c}">${l.m}</span></div>
-  `).join('');
-}
-
-async function runPipeline() {
-  const err = document.getElementById('errBox');
-  err.classList.remove('show');
-  err.textContent = '';
-
-  const free = document.getElementById('fFree').value.trim();
-  const mpn = document.getElementById('fMPN').value.trim();
-  const qty = document.getElementById('fQty').value.trim();
-  const price = document.getElementById('fPrice').value.trim();
-  const lead = document.getElementById('fLead').value;
-  const pkg = document.getElementById('fPkg').value.trim();
-  const notes = document.getElementById('fNotes').value.trim();
-
-  if (!free && !mpn) {
-    err.textContent = 'Please describe what you need or enter a part number.';
-    err.classList.add('show');
-    return;
-  }
-
-  const btn = document.getElementById('findBtn');
-  btn.disabled = true;
-  btn.textContent = LIVE_MODE ? 'Processing in Live Mode…' : 'Processing in Demo Mode…';
-
-  document.getElementById('resultsWrap').style.display = 'none';
-  document.getElementById('resultCards').innerHTML = '';
-  ['coord', 'supp', 'cust'].forEach(id => agent(id, 'idle'));
-
-  const requestPayload = { free, mpn, qty, price, lead, pkg, notes };
-  const requestSummary = free || [
-    mpn && `Part: ${mpn}`,
-    qty && `Qty: ${qty}`,
-    price && `Max price: $${price}`,
-    lead && `Lead: ${lead} weeks`,
-    pkg && `Package: ${pkg}`,
-    notes && `Notes: ${notes}`
-  ].filter(Boolean).join(', ');
-
-  try {
-    let coord;
-    let supp;
-    let cust;
-
-    agent('coord', 'run');
-    log('lc', `Received new sourcing request (${LIVE_MODE ? 'live' : 'demo'} mode)`);
-    OC[0].status = 'running';
-    OC[0].req++;
-    await delay(300);
-
-    if (LIVE_MODE) {
-      coord = await ai(
-        `You are the Coordinator Agent for Aixinchips. Parse the customer request and extract structured semiconductor sourcing requirements. Respond ONLY in valid JSON: {"partNumber":"","manufacturer":"","quantity":0,"maxUnitPrice":0,"leadTimeWeeks":0,"packageType":"","notes":"","urgency":"normal","supplierQuery":""}`,
-        `Customer request: ${requestSummary}`
-      );
-    } else {
-      coord = parseRequestDemo(requestPayload);
-    }
-
-    agent('coord', 'done', `Parsed ${coord.partNumber || 'request'} · Qty ${coord.quantity || '?'} · Max $${coord.maxUnitPrice || '?'} · Lead ${coord.leadTimeWeeks || 'any'} week(s)`);
-    log('lc', `Coordinator parsed ${coord.partNumber || 'request'}`);
-    OC[0].status = 'standby';
-
-    await delay(350);
-
-    agent('supp', 'run');
-    log('ls', 'Searching supplier inventory');
-    OC[1].status = 'running';
-    OC[1].req++;
-    await delay(300);
-
-    if (LIVE_MODE) {
-      supp = await ai(
-        `You are the Supplier Agent for Aixinchips. Generate 3 realistic supplier offers from reputable semiconductor distributors such as Digi-Key, Mouser Electronics, Arrow Electronics, Avnet, Future Electronics, TTI Inc. Respond ONLY in valid JSON: {"offers":[{"supplier":"","unitPrice":0,"stockQty":0,"leadTimeWeeks":0,"moq":0,"packaging":"","authentic":true,"approvedSupplier":true,"reliability":0.9,"lifecycle":"ACTIVE"}]}`,
-        `Requirement: ${JSON.stringify(coord)}`
-      );
-    } else {
-      supp = supplierSearchDemo(coord);
-    }
-
-    const offerCount = (supp.offers || []).length;
-    agent('supp', 'done', `Retrieved ${offerCount} offer(s)${offerCount ? ' · ' + (supp.offers || []).map(o => o.supplier).join(', ') : ''}`);
-    log('ls', `${offerCount} supplier offers returned`);
-    OC[1].status = 'standby';
-
-    await delay(350);
-
-    agent('cust', 'run');
-    log('lk', 'Verifying and ranking offers');
-    OC[2].status = 'running';
-    OC[2].req++;
-    await delay(300);
-
-    if (LIVE_MODE) {
-      cust = await ai(
-        `You are the Matching & Verification Agent for Aixinchips. Rank and verify supplier offers. Reject invalid offers. Prefer approved, authentic suppliers. Prioritize price, lead time, stock coverage, and reliability. Respond ONLY in valid JSON: {"rankedOffers":[{"rank":1,"supplier":"","unitPrice":0,"stockQty":0,"leadTimeWeeks":0,"moq":0,"totalCost":0,"confidence":0.9,"matchType":"exact","ruleFlags":["AUTHENTIC","APPROVED"],"reason":"","rejected":false}]}`,
-        `Request: ${JSON.stringify(coord)}\nOffers: ${JSON.stringify(supp)}`
-      );
-    } else {
-      cust = evaluateOffersDemo(coord, supp);
-    }
-
-    const ranked = (cust.rankedOffers || []).filter(o => !o.rejected).slice(0, 3);
-    const rejectedCount = (cust.rankedOffers || []).filter(o => o.rejected).length;
-
-    agent('cust', 'done', `${ranked.length} valid result(s) · ${rejectedCount} rejected · Best ${ranked[0] ? '$' + ranked[0].unitPrice.toFixed(4) + '/unit from ' + ranked[0].supplier : 'match unavailable'}`);
-    log('lk', `Verification complete · ${ranked.length} valid / ${rejectedCount} rejected`);
-    OC[2].status = 'standby';
-
-    drawResults(ranked, coord);
-
-    addHist({
-      time: new Date().toLocaleTimeString(),
-      mpn: coord.partNumber || mpn || '—',
-      qty: coord.quantity || qty || '—',
-      price: ranked[0]?.unitPrice?.toFixed(4) || null,
-      lead: ranked[0]?.leadTimeWeeks || null,
-      status: ranked.length ? 'Complete' : 'Review'
-    });
-
-    if (!ranked.length) {
-      err.textContent = 'No valid offers passed the current rules. Try relaxing price, lead time, or package constraints.';
-      err.classList.add('show');
-    }
-  } catch (e) {
-    err.textContent = 'Error: ' + e.message;
-    err.classList.add('show');
-    ['coord', 'supp', 'cust'].forEach(id => agent(id, 'idle'));
-    OC.forEach(node => node.status = 'standby');
-    log('ly', 'Error: ' + e.message);
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = `
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polygon points="5 3 19 12 5 21 5 3"/>
-    </svg>
-    Find Parts
-  `;
-}
-
-function drawResults(offers, req) {
-  document.getElementById('resultsWrap').style.display = 'block';
-  const wrap = document.getElementById('resultCards');
-
-  if (!offers.length) {
-    wrap.innerHTML = `
-      <div class="card" style="padding:32px;text-align:center;color:var(--muted)">
-        No valid offers found. Try relaxing price, lead time, or package requirements.
-      </div>
-    `;
-    return;
-  }
-
-  const labels = ['Best Match', '2nd Option', '3rd Option'];
-
-  wrap.innerHTML = offers.map((o, i) => {
-    const conf = Math.round((o.confidence || 0.85) * 100);
-    const cc = conf >= 85 ? 'var(--green)' : conf >= 65 ? 'var(--orange)' : 'var(--red)';
-    const total = o.totalCost || ((o.unitPrice || 0) * (req?.quantity || 1));
-
-    const flags = (o.ruleFlags || []).map(f => {
-      const warnFlags = ['OVER_BUDGET', 'SLOW_LEAD', 'LOW_STOCK', 'MOQ_HIGH', 'UNVERIFIED_AUTH'];
-      const klass = warnFlags.includes(f) ? 'rflag rflag-warn' : 'rflag rflag-ok';
-      return `<span class="${klass}">${f}</span>`;
-    }).join('');
-
-    return `
-      <div class="result-card r${i + 1}" style="animation-delay:${i * 0.08}s">
-        <div>
-          <div class="res-rank">${labels[i] || `Option ${i + 1}`}</div>
-          <div class="res-supplier">${o.supplier}</div>
-          <div class="res-part">${req?.partNumber || ''}${req?.packageType ? ' · ' + req.packageType : ''}${o.matchType ? ' · ' + o.matchType.toUpperCase() : ''}</div>
-
-          <div class="res-meta">
-            <div class="rmi">Stock <strong style="color:var(--green)">${(o.stockQty || 0).toLocaleString()}</strong></div>
-            <div class="rmi">MOQ <strong>${o.moq || 1}</strong></div>
-            <div class="rmi">Lead <strong>${o.leadTimeWeeks || '?'} wks</strong></div>
-            <div class="rmi">Total est. <strong>$${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
+  const border = status === "running" ? "#a8c8f5" : status === "done" ? "#86efac" : "#dde3ed";
+  const shadow = status === "running" ? "0 0 0 3px #e6f0fc" : "none";
+  return (
+    <div style={{ background: "#fff", border: `1px solid ${border}`, borderRadius: 10, marginBottom: 10, overflow: "hidden", boxShadow: shadow, transition: "all 0.2s" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 16px" }}>
+        <div style={{ width: 36, height: 36, borderRadius: 8, background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{iconMap[role]}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: accent }}>{label}</div>
+          <div style={{ fontSize: 11, color: "#8a9ab0", marginTop: 1 }}>
+            {role === "coord" && "Parses request · checks rules · orchestrates pipeline"}
+            {role === "supp"  && "Searches distributor inventory · retrieves offers"}
+            {role === "cust"  && "Ranks results · verifies rules · explains recommendations"}
           </div>
-
-          <div class="res-flags">${flags}</div>
-          ${o.reason ? `<div class="res-reason">${o.reason}</div>` : ''}
         </div>
+        {status === "idle"    && <Pill color="gray">Idle</Pill>}
+        {status === "running" && <Pill color="blue">Processing…</Pill>}
+        {status === "done"    && <Pill color="green">Done</Pill>}
+      </div>
+      {status === "running" && (
+        <div style={{ borderTop: "1px solid #dde3ed", padding: "10px 16px", background: "#f7f9fc", display: "flex", gap: 4, alignItems: "center" }}>
+          {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "#1a6fd8", animation: `bounce 0.8s ${i*150}ms infinite` }} />)}
+        </div>
+      )}
+      {status === "done" && output && (
+        <div style={{ borderTop: "1px solid #dde3ed", padding: "10px 16px", background: "#f7f9fc", fontSize: 12, color: "#4a5568", lineHeight: 1.6 }}>{output}</div>
+      )}
+    </div>
+  );
+}
 
-        <div class="res-right">
-          <div class="res-price">$${(o.unitPrice || 0).toFixed(4)}</div>
-          <div class="res-price-sub">per unit</div>
-          <div class="res-total">Est. total $${total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
-          <div>
-            <div class="conf-label">Confidence ${conf}%</div>
-            <div class="conf-bar-wrap">
-              <div class="conf-bar" style="width:${conf}%;background:${cc}"></div>
+function ResultCard({ offer, req, rank }) {
+  const conf = Math.round((offer.confidence || 0.85) * 100);
+  const cc = conf >= 85 ? "#16a34a" : conf >= 65 ? "#c05a00" : "#b91c1c";
+  const borders = ["4px solid #16a34a", "4px solid #1a6fd8", "4px solid #c5cfe0"];
+  const rankColors = ["#16a34a", "#1a6fd8", "#8a9ab0"];
+  const labels = ["Best Match", "2nd Option", "3rd Option"];
+  const total = offer.totalCost || ((offer.unitPrice || 0) * (req?.quantity || 1));
+  return (
+    <div style={{ background: "#fff", border: "1px solid #dde3ed", borderLeft: borders[rank], borderRadius: 10, padding: "16px 18px", marginBottom: 10, display: "grid", gridTemplateColumns: "1fr auto", gap: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+      <div>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: rankColors[rank], marginBottom: 3 }}>{labels[rank]}</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: "#1e3a5f", marginBottom: 2 }}>{offer.supplier}</div>
+        <div style={{ fontFamily: "monospace", fontSize: 11, color: "#1a6fd8", marginBottom: 9 }}>{req?.partNumber || ""}{req?.packageType ? " · " + req.packageType : ""}</div>
+        <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginBottom: 7 }}>
+          {[["Stock", (offer.stockQty||0).toLocaleString() + " units", "#16a34a"], ["MOQ", offer.moq||1, null], ["Lead Time", (offer.leadTimeWeeks||"?") + " wks", null], ["Est. Total", "$" + total.toLocaleString(undefined,{maximumFractionDigits:2}), null]].map(([k,v,vc]) => (
+            <div key={k} style={{ fontSize: 12, color: "#4a5568" }}>{k} <strong style={{ color: vc||"#1a2332" }}>{v}</strong></div>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: offer.reason ? 7 : 0 }}>
+          {(offer.ruleFlags||[]).map(f => <span key={f} style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "#dcfce7", color: "#16a34a" }}>{f}</span>)}
+        </div>
+        {offer.reason && <div style={{ fontSize: 11, color: "#8a9ab0", fontStyle: "italic", paddingTop: 8, borderTop: "1px solid #dde3ed", lineHeight: 1.5 }}>{offer.reason}</div>}
+      </div>
+      <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, minWidth: 110 }}>
+        <div style={{ fontSize: 24, fontWeight: 800, color: "#1e3a5f" }}>${(offer.unitPrice||0).toFixed(4)}</div>
+        <div style={{ fontSize: 11, color: "#8a9ab0", marginTop: -4 }}>per unit</div>
+        <div style={{ fontSize: 11, color: "#4a5568", fontWeight: 600 }}>Total ${total.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+        <div>
+          <div style={{ fontSize: 10, color: "#8a9ab0", fontWeight: 600, marginBottom: 3 }}>Confidence {conf}%</div>
+          <div style={{ width: 80, height: 4, background: "#dde3ed", borderRadius: 2 }}>
+            <div style={{ width: conf + "%", height: "100%", background: cc, borderRadius: 2 }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [tab, setTab]         = useState("Sourcing");
+  const [apiKey, setApiKey]   = useState("");
+  const [keyInput, setKeyInput] = useState("");
+  const [keySet, setKeySet]   = useState(false);
+  const [form, setForm]       = useState({ free: "", mpn: "", qty: "", price: "", lead: "", pkg: "", notes: "" });
+  const [agentStatus, setAS]  = useState({ coord: "idle", supp: "idle", cust: "idle" });
+  const [agentOut, setAO]     = useState({ coord: null, supp: null, cust: null });
+  const [results, setResults] = useState(null);
+  const [coordData, setCD]    = useState(null);
+  const [running, setRunning] = useState(false);
+  const [error, setError]     = useState("");
+  const [history, setHistory] = useState([]);
+  const [rules, setRules]     = useState(DEFAULT_RULES);
+  const [ocReqs, setOcReqs]   = useState([0,0,0]);
+  const [logs, setLogs]       = useState([
+    { c: "#0e7490", m: "OpenClaw gateway started" },
+    { c: "#0e7490", m: "Skill loaded: aixinchips-sourcing v1.0" },
+    { c: "#1a6fd8", m: "Coordinator Agent ready" },
+    { c: "#c05a00", m: "Supplier Agent ready" },
+    { c: "#16a34a", m: "Customer Agent ready" },
+  ]);
+  const t0 = useRef(Date.now());
+
+  const addLog = (c, m) => setLogs(l => [...l, { c, m }]);
+  const sa = (id, s, o = null) => { setAS(a => ({...a,[id]:s})); setAO(a => ({...a,[id]:o})); };
+
+  const saveKey = () => {
+    if (!keyInput.startsWith("sk-")) { setError("Invalid API key — must start with sk-ant-"); return; }
+    setApiKey(keyInput); setKeySet(true); setError("");
+  };
+
+  const run = async () => {
+    if (!form.free && !form.mpn) { setError("Please describe what you need or enter a part number."); return; }
+    setError(""); setRunning(true); setResults(null); setCD(null);
+    setAS({ coord:"idle", supp:"idle", cust:"idle" });
+    setAO({ coord:null, supp:null, cust:null });
+
+    const req = form.free || [form.mpn&&`Part: ${form.mpn}`, form.qty&&`Qty: ${form.qty}`, form.price&&`Max price: $${form.price}`, form.lead&&`Lead: ${form.lead} weeks`, form.pkg&&`Package: ${form.pkg}`, form.notes].filter(Boolean).join(", ");
+
+    try {
+      // COORDINATOR
+      sa("coord","running");
+      addLog("#1a6fd8","Received new sourcing request");
+      setOcReqs(r => { const n=[...r]; n[0]++; return n; });
+      const coord = await ai(apiKey,
+        `You are the Coordinator Agent for Aixinchips, an AI semiconductor sourcing platform. Parse the customer request. Respond ONLY in valid JSON, no markdown, no extra text: {"partNumber":"","manufacturer":"","quantity":0,"maxUnitPrice":0,"leadTimeWeeks":0,"packageType":"","notes":"","urgency":"normal","supplierQuery":""}`,
+        `Customer request: ${req}`);
+      setCD(coord);
+      sa("coord","done",`Parsed: ${coord.partNumber||"part"} × ${coord.quantity||"?"} units · Max $${coord.maxUnitPrice||"?"}/unit · ${coord.urgency||"normal"} urgency`);
+      addLog("#1a6fd8",`Parsed ${coord.partNumber||"request"} × ${coord.quantity||"?"}`);
+      setOcReqs(r => { const n=[...r]; n[0]++; return n; });
+      await new Promise(r=>setTimeout(r,300));
+
+      // SUPPLIER
+      sa("supp","running");
+      addLog("#c05a00","Querying distributor inventory");
+      setOcReqs(r => { const n=[...r]; n[1]++; return n; });
+      const supp = await ai(apiKey,
+        `You are the Supplier Agent for Aixinchips. Generate 3 realistic supplier offers from real distributors: Arrow Electronics, Avnet, Mouser Electronics, Digi-Key, Future Electronics, TTI. Use realistic prices and stock. Respond ONLY in valid JSON, no markdown: {"offers":[{"supplier":"","unitPrice":0,"stockQty":0,"leadTimeWeeks":0,"moq":0,"packaging":"","authentic":true,"approvedSupplier":true}]}`,
+        `Requirement: ${JSON.stringify(coord)}\nOriginal: ${req}`);
+      const offers = supp.offers || [];
+      sa("supp","done",`Retrieved ${offers.length} offers — ${offers.map(o=>o.supplier).join(", ")}`);
+      addLog("#c05a00",`${offers.length} offers retrieved`);
+      await new Promise(r=>setTimeout(r,300));
+
+      // CUSTOMER
+      sa("cust","running");
+      addLog("#16a34a","Ranking and verifying offers");
+      setOcReqs(r => { const n=[...r]; n[2]++; return n; });
+      const cust = await ai(apiKey,
+        `You are the Customer Agent for Aixinchips. Rank and verify supplier offers. Reject if not authentic or unapproved. Rank by: price, stock, lead time, reliability. Respond ONLY in valid JSON, no markdown: {"rankedOffers":[{"rank":1,"supplier":"","unitPrice":0,"stockQty":0,"leadTimeWeeks":0,"moq":0,"totalCost":0,"confidence":0.9,"matchType":"exact","ruleFlags":["AUTHENTIC","APPROVED"],"reason":"why recommended","rejected":false}]}`,
+        `Request: ${JSON.stringify(coord)}\nOffers: ${JSON.stringify(supp)}`);
+      const ranked = (cust.rankedOffers||[]).filter(o=>!o.rejected).slice(0,3);
+      sa("cust","done",`${ranked.length} valid results · Best: $${ranked[0]?.unitPrice?.toFixed(4)||"?"}/unit from ${ranked[0]?.supplier||"?"}`);
+      addLog("#16a34a",`Report ready — ${ranked.length} results`);
+      setResults(ranked);
+      setHistory(h => [{ time: new Date().toLocaleTimeString(), mpn: coord.partNumber||form.mpn||"—", qty: coord.quantity||form.qty||"—", price: ranked[0]?.unitPrice?.toFixed(4)||null, lead: ranked[0]?.leadTimeWeeks||null, status: ranked.length?"Complete":"Review" }, ...h]);
+    } catch(e) {
+      setError("Error: " + e.message);
+      setAS({ coord:"idle", supp:"idle", cust:"idle" });
+      addLog("#b91c1c","Error: " + e.message);
+    }
+    setRunning(false);
+  };
+
+  const uptime = () => { const s=Math.floor((Date.now()-t0.current)/1000); return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m ${s%60}s`; };
+
+  const navBtn = (t) => ({ fontSize: 13, fontWeight: tab===t?600:500, padding: "7px 16px", borderRadius: 6, cursor: "pointer", color: tab===t?"#fff":"rgba(255,255,255,0.5)", background: tab===t?"rgba(255,255,255,0.15)":"none", border: "none" });
+  const pg = { padding: "28px 32px", maxWidth: 1160, margin: "0 auto" };
+  const pgHead = { display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:22, paddingBottom:18, borderBottom:"1px solid #dde3ed" };
+
+  return (
+    <div style={{ fontFamily:"'Plus Jakarta Sans','Segoe UI',sans-serif", background:"#f0f3f8", minHeight:"100vh", color:"#1a2332" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        *{box-sizing:border-box;}
+        input:focus,textarea:focus,select:focus{outline:none;border-color:#1a6fd8 !important;box-shadow:0 0 0 3px #e6f0fc;}
+        tbody tr:hover td{background:#f7f9fc;}
+        button{font-family:inherit;}
+      `}</style>
+
+      {/* NAV */}
+      <div style={{ background:"#1e3a5f", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 28px", height:56, boxShadow:"0 1px 6px rgba(0,0,0,0.2)", position:"sticky", top:0, zIndex:100 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:30, height:30, background:"linear-gradient(135deg,#38bdf8,#22d3ee)", borderRadius:7, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color:"#fff" }}>AI</div>
+          <span style={{ fontWeight:800, fontSize:16, color:"#fff", letterSpacing:"-0.01em" }}>aixin<span style={{color:"#38bdf8"}}>chips</span></span>
+          <span style={{ fontSize:11, color:"rgba(255,255,255,0.3)", marginLeft:6 }}>AI Semiconductor Sourcing · Singapore</span>
+        </div>
+        <div style={{ display:"flex", gap:2 }}>
+          {TABS.map(t => <button key={t} style={navBtn(t)} onClick={()=>setTab(t)}>{t}</button>)}
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"#4ade80", fontWeight:500 }}>
+          <div style={{ width:7, height:7, borderRadius:"50%", background:"#4ade80", animation:"pulse 2s infinite" }} />
+          {keySet ? "3 agents online" : "API key required"}
+        </div>
+      </div>
+
+      {/* API KEY BANNER */}
+      {!keySet && (
+        <div style={{ background:"#fffbeb", borderBottom:"1px solid #fde68a", padding:"10px 28px", display:"flex", alignItems:"center", gap:12, fontSize:13, color:"#92400e" }}>
+          <strong>Anthropic API key required to activate agents:</strong>
+          <input
+            type="password"
+            placeholder="sk-ant-api03-…"
+            value={keyInput}
+            onChange={e=>setKeyInput(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&saveKey()}
+            style={{ flex:1, maxWidth:360, background:"#fff", border:"1px solid #fcd34d", borderRadius:6, padding:"6px 10px", fontSize:12, fontFamily:"monospace", color:"#1a2332" }}
+          />
+          <button onClick={saveKey} style={{ background:"#d97706", color:"#fff", border:"none", borderRadius:6, padding:"7px 16px", fontSize:12, fontWeight:700, cursor:"pointer" }}>Activate</button>
+          <span style={{ fontSize:11, color:"#b45309" }}>Get yours free at console.anthropic.com</span>
+        </div>
+      )}
+
+      {/* ── SOURCING ── */}
+      {tab === "Sourcing" && (
+        <div style={pg}>
+          <div style={pgHead}>
+            <div>
+              <div style={{ fontSize:21, fontWeight:800, color:"#1e3a5f" }}>Semiconductor Sourcing</div>
+              <div style={{ fontSize:13, color:"#8a9ab0", marginTop:3 }}>Describe your requirement — three OpenClaw agents handle the rest</div>
+            </div>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"390px 1fr", gap:20 }}>
+
+            {/* FORM */}
+            <CardWrap>
+              <CardHead>New Sourcing Request</CardHead>
+              <div style={{ padding:18 }}>
+                <div style={{ marginBottom:14 }}>
+                  <Label>Describe what you need</Label>
+                  <textarea value={form.free} onChange={e=>setForm({...form,free:e.target.value})} rows={3} placeholder="e.g. Need 500 STM32F103C8T6 within 2 weeks, max $3/unit, authentic only" style={{ width:"100%", background:"#fff", border:"1px solid #c5cfe0", borderRadius:7, color:"#1a2332", fontFamily:"inherit", fontSize:13, padding:"8px 11px", resize:"none", lineHeight:1.5 }} />
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
+                  <div><Label>Part Number (MPN)</Label><Input placeholder="STM32F103C8T6" value={form.mpn} onChange={e=>setForm({...form,mpn:e.target.value})} /></div>
+                  <div><Label>Quantity</Label><Input type="number" placeholder="500" value={form.qty} onChange={e=>setForm({...form,qty:e.target.value})} /></div>
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
+                  <div><Label>Max Unit Price (USD)</Label><Input type="number" step="0.01" placeholder="3.00" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} /></div>
+                  <div><Label>Lead Time Required</Label>
+                    <Select value={form.lead} onChange={e=>setForm({...form,lead:e.target.value})}>
+                      <option value="">Any</option>
+                      <option value="1">Within 1 week</option>
+                      <option value="2">Within 2 weeks</option>
+                      <option value="4">Within 4 weeks</option>
+                      <option value="8">Within 8 weeks</option>
+                    </Select>
+                  </div>
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
+                  <div><Label>Package Type</Label><Input placeholder="LQFP-48, SOT-223…" value={form.pkg} onChange={e=>setForm({...form,pkg:e.target.value})} /></div>
+                  <div><Label>Special Requirements</Label><Input placeholder="RoHS, authentic only…" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} /></div>
+                </div>
+                <button onClick={run} disabled={running||!keySet} style={{ width:"100%", padding:11, borderRadius:8, background: (!keySet||running)?"#8a9ab0":"#1a6fd8", border:"none", color:"#fff", fontSize:14, fontWeight:700, cursor:(!keySet||running)?"not-allowed":"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+                  {!running && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                  {running ? "Processing…" : !keySet ? "Enter API key to activate" : "Find Parts"}
+                </button>
+                {error && <div style={{ background:"#fee2e2", border:"1px solid #fca5a5", borderRadius:7, padding:"10px 14px", fontSize:13, color:"#b91c1c", marginTop:10 }}>{error}</div>}
+              </div>
+            </CardWrap>
+
+            {/* AGENTS + RESULTS */}
+            <div>
+              <AgentRow label="Coordinator Agent" role="coord" status={agentStatus.coord} output={agentOut.coord} accent="#1a6fd8" bg="#e6f0fc" />
+              <AgentRow label="Supplier Agent"    role="supp"  status={agentStatus.supp}  output={agentOut.supp}  accent="#c05a00" bg="#fff0e0" />
+              <AgentRow label="Customer Agent"    role="cust"  status={agentStatus.cust}  output={agentOut.cust}  accent="#16a34a" bg="#dcfce7" />
+              {results && (
+                <div style={{ marginTop:14 }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:"#8a9ab0", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>Sourcing Results</div>
+                  {results.length === 0
+                    ? <CardWrap style={{ padding:32, textAlign:"center", color:"#8a9ab0" }}>No valid offers found. Try adjusting price or lead time.</CardWrap>
+                    : results.map((o,i) => <ResultCard key={i} offer={o} req={coordData} rank={i} />)}
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
-}
+      )}
 
-drawRules();
-drawOC();
-updateModeUI();
-</script>
-</body>
-</html>
+      {/* ── HISTORY ── */}
+      {tab === "History" && (
+        <div style={pg}>
+          <div style={pgHead}><div><div style={{ fontSize:21, fontWeight:800, color:"#1e3a5f" }}>Request History</div><div style={{ fontSize:13, color:"#8a9ab0", marginTop:3 }}>All sourcing requests processed by the platform</div></div></div>
+          <CardWrap>
+            <table style={{ width:"100%", borderCollapse:"collapse" }}>
+              <thead><tr>{["Time","Part Number","Qty","Best Price","Lead Time","Status"].map(h=><th key={h} style={{ fontSize:11, fontWeight:700, color:"#8a9ab0", letterSpacing:"0.07em", textTransform:"uppercase", padding:"10px 14px", textAlign:"left", borderBottom:"2px solid #dde3ed" }}>{h}</th>)}</tr></thead>
+              <tbody>
+                {history.length===0
+                  ? <tr><td colSpan={6} style={{ textAlign:"center", padding:40, color:"#8a9ab0", fontSize:13 }}>No requests yet</td></tr>
+                  : history.map((h,i)=>(
+                    <tr key={i}>
+                      <td style={{ padding:"11px 14px", borderBottom:"1px solid #dde3ed", fontFamily:"monospace", fontSize:12, color:"#8a9ab0" }}>{h.time}</td>
+                      <td style={{ padding:"11px 14px", borderBottom:"1px solid #dde3ed", fontFamily:"monospace", fontSize:12, color:"#1a6fd8" }}>{h.mpn}</td>
+                      <td style={{ padding:"11px 14px", borderBottom:"1px solid #dde3ed" }}>{h.qty}</td>
+                      <td style={{ padding:"11px 14px", borderBottom:"1px solid #dde3ed", color:"#16a34a", fontWeight:600 }}>{h.price?"$"+h.price:"—"}</td>
+                      <td style={{ padding:"11px 14px", borderBottom:"1px solid #dde3ed" }}>{h.lead?h.lead+" wk":"—"}</td>
+                      <td style={{ padding:"11px 14px", borderBottom:"1px solid #dde3ed" }}><Pill color={h.status==="Complete"?"green":h.status==="Review"?"orange":"blue"}>{h.status}</Pill></td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </CardWrap>
+        </div>
+      )}
+
+      {/* ── RULES ── */}
+      {tab === "Rules" && (
+        <div style={pg}>
+          <div style={pgHead}><div><div style={{ fontSize:21, fontWeight:800, color:"#1e3a5f" }}>Verification Rules</div><div style={{ fontSize:13, color:"#8a9ab0", marginTop:3 }}>Rules applied by the Coordinator Agent before any result is shown</div></div></div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:14 }}>
+            {rules.map((r,i)=>(
+              <CardWrap key={i} style={{ padding:16 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:7 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#1e3a5f" }}>{r.name}</div>
+                  <div onClick={()=>setRules(rules.map((x,j)=>j===i?{...x,on:!x.on}:x))} style={{ position:"relative", width:40, height:22, flexShrink:0, cursor:"pointer" }}>
+                    <div style={{ position:"absolute", inset:0, borderRadius:11, background:r.on?"#1a6fd8":"#c5cfe0", transition:"background 0.2s" }} />
+                    <div style={{ position:"absolute", width:16, height:16, borderRadius:"50%", background:"#fff", top:3, left:r.on?21:3, transition:"left 0.2s", boxShadow:"0 1px 3px rgba(0,0,0,0.2)" }} />
+                  </div>
+                </div>
+                <div style={{ fontSize:12, color:"#4a5568", lineHeight:1.5, marginBottom:9 }}>{r.desc}</div>
+                <span style={{ fontSize:10, fontWeight:700, padding:"2px 9px", borderRadius:4, background:r.type==="REJECT"?"#fee2e2":r.type==="FLAG"?"#fff0e0":"#e6f0fc", color:r.type==="REJECT"?"#b91c1c":r.type==="FLAG"?"#c05a00":"#1a6fd8" }}>{r.type}</span>
+              </CardWrap>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── OPENCLAW ── */}
+      {tab === "OpenClaw" && (
+        <div style={pg}>
+          <div style={pgHead}><div><div style={{ fontSize:21, fontWeight:800, color:"#1e3a5f" }}>OpenClaw Agent Network</div><div style={{ fontSize:13, color:"#8a9ab0", marginTop:3 }}>Three OpenClaw nodes running the Aixinchips sourcing pipeline</div></div></div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14, marginBottom:20 }}>
+            {OC_NODES.map((o,i)=>(
+              <CardWrap key={i}>
+                <div style={{ background:"#1e3a5f", padding:"13px 16px", display:"flex", alignItems:"center", gap:10, borderRadius:"10px 10px 0 0" }}>
+                  <div style={{ width:32, height:32, background:"rgba(255,255,255,0.12)", borderRadius:7, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color:"#fff", flexShrink:0 }}>{o.label}</div>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color:"#fff" }}>{o.name}</div>
+                    <div style={{ fontFamily:"monospace", fontSize:10, color:"rgba(255,255,255,0.35)" }}>{o.host}</div>
+                  </div>
+                </div>
+                {[["Status", ocReqs[i]>0?"Active":"Standby", ocReqs[i]>0?"#16a34a":"#8a9ab0"], ["Model","claude-sonnet-4-6",null], ["Requests served",ocReqs[i],null], ["Uptime",uptime(),null]].map(([k,v,vc])=>(
+                  <div key={k} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 16px", borderBottom:"1px solid #dde3ed", fontSize:12 }}>
+                    <span style={{ fontSize:11, fontWeight:700, color:"#8a9ab0", textTransform:"uppercase", letterSpacing:"0.04em" }}>{k}</span>
+                    <span style={{ fontFamily:"monospace", fontSize:11, color:vc||"#1a2332", fontWeight:vc?700:400 }}>{v}</span>
+                  </div>
+                ))}
+              </CardWrap>
+            ))}
+          </div>
+          <CardWrap>
+            <CardHead>Live Activity Log</CardHead>
+            <div style={{ padding:"12px 16px", fontFamily:"monospace", fontSize:11, lineHeight:2, maxHeight:220, overflowY:"auto" }}>
+              {logs.map((l,i)=>(
+                <div key={i}>
+                  <span style={{ color:"#8a9ab0", marginRight:10 }}>{new Date().toLocaleTimeString()}</span>
+                  <span style={{ color:l.c }}>{l.m}</span>
+                </div>
+              ))}
+            </div>
+          </CardWrap>
+        </div>
+      )}
+    </div>
+  );
+}
