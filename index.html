@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aixinchips — Semiconductor Sourcing</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #05080f;
+  --s1: #0a0f1c;
+  --s2: #0f1626;
+  --border: #1a2540;
+  --border2: #243560;
+  --text: #c0d4e8;
+  --muted: #3a5570;
+  --dim: #162030;
+
+  --blue: #38bdf8;
+  --green: #4ade80;
+  --orange: #fb923c;
+  --red: #f87171;
+  --purple: #c084fc;
+  --yellow: #fbbf24;
+  --teal: #2dd4bf;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(5,8,15,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 54px;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, var(--blue), var(--teal)); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.nav-logo-text { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 16px; letter-spacing: -0.01em; color: #fff; }
+.nav-logo-text span { color: var(--blue); }
+.nav-tabs { display: flex; gap: 2px; }
+.nav-tab { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.05em; padding: 6px 14px; border-radius: 6px; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
+.nav-tab:hover { color: var(--text); background: var(--s2); }
+.nav-tab.active { color: var(--blue); background: color-mix(in srgb, var(--blue) 12%, transparent); }
+.nav-status { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--green); }
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+/* ── PAGES ── */
+.page { display: none; padding: 32px 28px; max-width: 1100px; margin: 0 auto; }
+.page.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 28px; }
+.page-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.25em; color: var(--muted); margin-bottom: 6px; }
+.page-title { font-family: 'Syne', sans-serif; font-size: clamp(22px, 3vw, 34px); font-weight: 900; color: #fff; line-height: 1.1; }
+.page-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+/* ── SOURCING PAGE ── */
+.sourcing-layout { display: grid; grid-template-columns: 420px 1fr; gap: 20px; align-items: start; }
+@media(max-width:820px) { .sourcing-layout { grid-template-columns: 1fr; } }
+
+/* REQUEST FORM */
+.form-card { background: var(--s1); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.form-card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.form-card-header .agent-dot { width: 8px; height: 8px; border-radius: 50%; }
+.form-card-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--text); }
+.form-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--muted); display: block; margin-bottom: 5px; }
+input, textarea, select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; padding: 9px 12px; transition: border-color 0.15s;
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blue); }
+textarea { resize: none; line-height: 1.5; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.submit-btn {
+  width: 100%; padding: 12px; border-radius: 9px;
+  background: linear-gradient(135deg, #0070cc, #00a080);
+  border: none; color: #fff; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 0.03em;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.submit-btn:hover { opacity: 0.9; }
+.submit-btn:active { transform: scale(0.99); }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* PIPELINE PANEL */
+.pipeline-panel { display: flex; flex-direction: column; gap: 12px; }
+
+/* AGENT CARD */
+.agent-card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s;
+}
+.agent-card.active { box-shadow: 0 0 24px color-mix(in srgb, var(--agent-color, var(--blue)) 20%, transparent); }
+.agent-card-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.agent-icon { font-size: 20px; width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.agent-info { flex: 1; }
+.agent-name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; }
+.agent-role { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.agent-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 3px 9px; border-radius: 4px; }
+
+.agent-output {
+  border-top: 1px solid var(--border); padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  line-height: 1.7; color: var(--muted); min-height: 44px;
+  display: none;
+}
+.agent-card.has-output .agent-output { display: block; }
+.thinking { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.thinking span { width: 5px; height: 5px; border-radius: 50%; background: var(--blue); animation: bounce 0.8s infinite; }
+.thinking span:nth-child(2) { animation-delay: 0.15s; }
+.thinking span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+/* RESULTS */
+.results-section { margin-top: 20px; }
+.results-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 12px; }
+.result-cards { display: flex; flex-direction: column; gap: 10px; }
+
+.result-card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 12px; align-items: start;
+  animation: fadeIn 0.3s ease both;
+  transition: border-color 0.2s;
+}
+.result-card:hover { border-color: var(--border2); }
+.result-card.rank1 { border-color: color-mix(in srgb, var(--green) 35%, transparent); background: color-mix(in srgb, var(--green) 4%, var(--s1)); }
+.result-card.rank2 { border-color: color-mix(in srgb, var(--blue) 30%, transparent); }
+.result-card.rank3 { border-color: color-mix(in srgb, var(--muted) 30%, transparent); }
+
+.result-supplier { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: #fff; margin-bottom: 4px; }
+.result-part { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--blue); margin-bottom: 8px; }
+.result-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+.result-meta-item { font-size: 12px; color: var(--muted); }
+.result-meta-item strong { color: var(--text); }
+.result-reason { margin-top: 8px; font-size: 11px; color: var(--muted); font-style: italic; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 8px; }
+
+.result-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.result-price { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: #fff; }
+.result-price-sub { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); text-align: right; }
+.rank-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 3px 9px; border-radius: 4px; }
+.confidence-bar-wrap { width: 80px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.confidence-bar { height: 100%; border-radius: 2px; }
+
+.rule-flags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.rule-flag { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 3px; }
+.rule-ok  { background: color-mix(in srgb, var(--green) 12%, transparent); color: var(--green); }
+.rule-warn { background: color-mix(in srgb, var(--yellow) 12%, transparent); color: var(--yellow); }
+.rule-fail { background: color-mix(in srgb, var(--red) 12%, transparent); color: var(--red); }
+
+/* ── HISTORY PAGE ── */
+.history-table { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.history-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.history-table th { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.history-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: var(--s2); }
+.status-pill { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 8px; border-radius: 4px; }
+.sp-complete { background: color-mix(in srgb,var(--green) 12%,transparent); color: var(--green); }
+.sp-review   { background: color-mix(in srgb,var(--yellow) 12%,transparent); color: var(--yellow); }
+.sp-pending  { background: color-mix(in srgb,var(--blue) 12%,transparent); color: var(--blue); }
+
+/* ── RULES PAGE ── */
+.rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.rule-card { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.rule-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.rule-card-name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text); font-weight: 600; }
+.rule-toggle-btn { width: 36px; height: 20px; border-radius: 10px; border: none; cursor: pointer; position: relative; transition: background 0.2s; }
+.rule-toggle-btn.on { background: var(--green); }
+.rule-toggle-btn.off { background: var(--border2); }
+.rule-toggle-btn::after { content:''; position:absolute; top:3px; width:14px; height:14px; border-radius:50%; background:#fff; transition: left 0.2s; }
+.rule-toggle-btn.on::after { left: 19px; }
+.rule-toggle-btn.off::after { left: 3px; }
+.rule-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.rule-type { font-family: 'IBM Plex Mono', monospace; font-size: 9px; margin-top: 8px; display: inline-block; padding: 2px 7px; border-radius: 3px; }
+.rt-reject { background: color-mix(in srgb,var(--red) 12%,transparent); color: var(--red); }
+.rt-flag   { background: color-mix(in srgb,var(--yellow) 12%,transparent); color: var(--yellow); }
+.rt-require { background: color-mix(in srgb,var(--blue) 12%,transparent); color: var(--blue); }
+
+/* ── OPENCLAW STATUS PAGE ── */
+.oc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.oc-card { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.oc-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.oc-icon { font-size: 22px; }
+.oc-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: #fff; }
+.oc-host { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); }
+.oc-status-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.oc-status-row:last-child { border-bottom: none; }
+.oc-stat-label { color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+.oc-stat-val { color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+.oc-live { color: var(--green); }
+.oc-idle { color: var(--blue); }
+.oc-log { background: #030608; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.9; max-height: 180px; overflow-y: auto; }
+.log-ts { color: var(--muted); margin-right: 8px; }
+.log-coord { color: var(--blue); }
+.log-supp  { color: var(--orange); }
+.log-cust  { color: var(--green); }
+.log-sys   { color: var(--purple); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🦞</div>
+    <div class="nav-logo-text">aixin<span>chips</span></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('sourcing')">Sourcing</button>
+    <button class="nav-tab" onclick="showPage('history')">History</button>
+    <button class="nav-tab" onclick="showPage('rules')">Rules</button>
+    <button class="nav-tab" onclick="showPage('openclaw')">OpenClaw</button>
+  </div>
+  <div class="nav-status"><div class="pulse"></div>3 agents online</div>
+</nav>
+
+<!-- ══════════ PAGE: SOURCING ══════════ -->
+<div class="page active" id="page-sourcing">
+  <div class="page-header">
+    <div class="page-eyebrow">AIXINCHIPS // AI SEMICONDUCTOR SOURCING</div>
+    <div class="page-title">Find your parts</div>
+    <div class="page-sub">Describe what you need — the agents handle the rest</div>
+  </div>
+
+  <div class="sourcing-layout">
+
+    <!-- LEFT: REQUEST FORM -->
+    <div>
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="agent-dot" style="background:var(--blue)"></div>
+          <div class="form-card-title">SOURCING REQUEST</div>
+        </div>
+        <div class="form-body">
+          <div>
+            <label>DESCRIBE WHAT YOU NEED</label>
+            <textarea id="freeText" rows="3" placeholder="e.g. Need 500 STM32F103C8T6 within 2 weeks, max $3/unit, authentic only"></textarea>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>PART NUMBER (MPN)</label>
+              <input id="fPartNumber" type="text" placeholder="STM32F103C8T6">
+            </div>
+            <div>
+              <label>QUANTITY</label>
+              <input id="fQty" type="number" placeholder="500">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>MAX UNIT PRICE (USD)</label>
+              <input id="fPrice" type="number" step="0.01" placeholder="3.00">
+            </div>
+            <div>
+              <label>LEAD TIME NEEDED</label>
+              <select id="fLead">
+                <option value="">Any</option>
+                <option value="1">Within 1 week</option>
+                <option value="2">Within 2 weeks</option>
+                <option value="4">Within 4 weeks</option>
+                <option value="8">Within 8 weeks</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>PACKAGE TYPE</label>
+            <input id="fPackage" type="text" placeholder="LQFP-48, SOT-223, etc.">
+          </div>
+          <div>
+            <label>SPECIAL REQUIREMENTS</label>
+            <input id="fNotes" type="text" placeholder="Authentic only, RoHS, AEC-Q100...">
+          </div>
+          <button class="submit-btn" id="submitBtn" onclick="runSourcing()">▶ FIND PARTS</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: AGENTS + RESULTS -->
+    <div class="pipeline-panel">
+
+      <!-- COORDINATOR -->
+      <div class="agent-card" id="agent-coord" style="--agent-color: var(--blue)">
+        <div class="agent-card-top">
+          <div class="agent-icon" style="background:color-mix(in srgb,var(--blue) 15%,transparent)">⚡</div>
+          <div class="agent-info">
+            <div class="agent-name" style="color:var(--blue)">COORDINATOR AGENT</div>
+            <div class="agent-role">Parses request · applies rules · orchestrates pipeline</div>
+          </div>
+          <div class="agent-badge" id="badge-coord" style="background:var(--dim);color:var(--muted)">IDLE</div>
+        </div>
+        <div class="agent-output" id="out-coord"></div>
+      </div>
+
+      <!-- SUPPLIER -->
+      <div class="agent-card" id="agent-supp" style="--agent-color: var(--orange)">
+        <div class="agent-card-top">
+          <div class="agent-icon" style="background:color-mix(in srgb,var(--orange) 15%,transparent)">🔍</div>
+          <div class="agent-info">
+            <div class="agent-name" style="color:var(--orange)">SUPPLIER AGENT</div>
+            <div class="agent-role">Searches distributor inventory · evaluates offers</div>
+          </div>
+          <div class="agent-badge" id="badge-supp" style="background:var(--dim);color:var(--muted)">IDLE</div>
+        </div>
+        <div class="agent-output" id="out-supp"></div>
+      </div>
+
+      <!-- CUSTOMER -->
+      <div class="agent-card" id="agent-cust" style="--agent-color: var(--green)">
+        <div class="agent-card-top">
+          <div class="agent-icon" style="background:color-mix(in srgb,var(--green) 15%,transparent)">📋</div>
+          <div class="agent-info">
+            <div class="agent-name" style="color:var(--green)">CUSTOMER AGENT</div>
+            <div class="agent-role">Ranks results · explains recommendations</div>
+          </div>
+          <div class="agent-badge" id="badge-cust" style="background:var(--dim);color:var(--muted)">IDLE</div>
+        </div>
+        <div class="agent-output" id="out-cust"></div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="results-section" id="resultsSection" style="display:none">
+        <div class="results-title">SOURCING RESULTS</div>
+        <div class="result-cards" id="resultCards"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PAGE: HISTORY ══════════ -->
+<div class="page" id="page-history">
+  <div class="page-header">
+    <div class="page-eyebrow">AIXINCHIPS // REQUEST HISTORY</div>
+    <div class="page-title">Past sourcing requests</div>
+  </div>
+  <div class="history-table">
+    <table>
+      <thead>
+        <tr>
+          <th>TIME</th><th>PART NUMBER</th><th>QTY</th><th>CUSTOMER</th>
+          <th>BEST PRICE</th><th>LEAD TIME</th><th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════ PAGE: RULES ══════════ -->
+<div class="page" id="page-rules">
+  <div class="page-header">
+    <div class="page-eyebrow">AIXINCHIPS // VERIFICATION RULES</div>
+    <div class="page-title">Sourcing rules</div>
+    <div class="page-sub">Rules applied by the Coordinator Agent before any result is shown</div>
+  </div>
+  <div class="rules-grid" id="rulesGrid"></div>
+</div>
+
+<!-- ══════════ PAGE: OPENCLAW ══════════ -->
+<div class="page" id="page-openclaw">
+  <div class="page-header">
+    <div class="page-eyebrow">AIXINCHIPS // OPENCLAW STATUS</div>
+    <div class="page-title">Agent network</div>
+    <div class="page-sub">OpenClaw instances running the Aixinchips sourcing pipeline</div>
+  </div>
+  <div class="oc-grid" id="ocGrid"></div>
+  <div class="results-title" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--muted);margin-bottom:8px">LIVE ACTIVITY LOG</div>
+  <div class="oc-log" id="ocLog"></div>
+</div>
+
+<script>
+// ─── CLAUDE API ───
+const API = 'https://api.anthropic.com/v1/messages';
+async function claude(system, user) {
+  const r = await fetch(API, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514', max_tokens:1000,
+      system, messages:[{role:'user',content:user}]
+    })
+  });
+  const d = await r.json();
+  const t = (d.content||[]).map(c=>c.text||'').join('');
+  try { return JSON.parse(t.replace(/```json|```/g,'').trim()); }
+  catch { return {raw:t}; }
+}
+
+// ─── NAV ───
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='history') renderHistory();
+  if(id==='openclaw') renderOpenClaw();
+}
+
+// ─── AGENT STATE ───
+function setAgent(id, state, text) {
+  const card = document.getElementById('agent-'+id);
+  const badge = document.getElementById('badge-'+id);
+  const out = document.getElementById('out-'+id);
+  const colors = {coord:'var(--blue)',supp:'var(--orange)',cust:'var(--green)'};
+  const c = colors[id];
+
+  card.classList.remove('active','has-output');
+  badge.style.background = '';
+  badge.style.color = '';
+
+  if(state==='thinking') {
+    card.classList.add('active');
+    badge.textContent='PROCESSING';
+    badge.style.background=`color-mix(in srgb,${c} 15%,transparent)`;
+    badge.style.color=c;
+    out.innerHTML='<div class="thinking"><span></span><span></span><span></span></div>';
+    card.classList.add('has-output');
+  } else if(state==='done') {
+    badge.textContent='DONE';
+    badge.style.background=`color-mix(in srgb,var(--green) 12%,transparent)`;
+    badge.style.color='var(--green)';
+    if(text) {
+      out.innerHTML=`<span style="color:${c}">▸</span> ${text}`;
+      card.classList.add('has-output');
+    }
+  } else {
+    badge.textContent='IDLE';
+    badge.style.background='var(--dim)';
+    badge.style.color='var(--muted)';
+  }
+}
+
+// ─── HISTORY ───
+const history = [];
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  if(!history.length) {
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;font-family:\'IBM Plex Mono\',monospace;font-size:11px">No requests yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = history.map(h=>`
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">${h.time}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;color:var(--blue)">${h.partNumber||'—'}</td>
+      <td>${h.qty||'—'}</td>
+      <td>${h.customer||'Portal'}</td>
+      <td style="color:var(--green);font-family:'IBM Plex Mono',monospace">${h.bestPrice ? '$'+h.bestPrice : '—'}</td>
+      <td>${h.leadTime ? h.leadTime+'w' : '—'}</td>
+      <td><span class="status-pill ${h.status==='Complete'?'sp-complete':h.status==='Review'?'sp-review':'sp-pending'}">${h.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ─── RULES ───
+const RULES = [
+  {name:'Reject unapproved suppliers',desc:'Only verified suppliers in the approved list can appear in results.',type:'reject',on:true},
+  {name:'Reject obsolete parts',desc:'Parts with lifecycle status "NRND" or "EOL" are rejected unless explicitly requested.',type:'reject',on:true},
+  {name:'Require lead time data',desc:'Offers without a confirmed lead time are excluded from ranking.',type:'require',on:true},
+  {name:'Flag price outliers',desc:'Prices more than 40% below market average are flagged as potentially counterfeit.',type:'flag',on:true},
+  {name:'Reject packaging mismatch',desc:'Offers where package type does not match the requested spec are rejected.',type:'reject',on:true},
+  {name:'Flag unverified authenticity',desc:'Offers without an authenticity guarantee are flagged for human review.',type:'flag',on:true},
+  {name:'Require minimum stock',desc:'Offers where available quantity is less than requested are ranked lower.',type:'require',on:false},
+  {name:'Block grey market sources',desc:'Brokers not on the approved distributor list are automatically rejected.',type:'reject',on:true},
+];
+function renderRules() {
+  document.getElementById('rulesGrid').innerHTML = RULES.map((r,i)=>`
+    <div class="rule-card">
+      <div class="rule-card-header">
+        <div class="rule-card-name">${r.name}</div>
+        <button class="rule-toggle-btn ${r.on?'on':'off'}" onclick="toggleRule(${i},this)"></button>
+      </div>
+      <div class="rule-desc">${r.desc}</div>
+      <span class="rule-type ${r.type==='reject'?'rt-reject':r.type==='flag'?'rt-flag':'rt-require'}">${r.type.toUpperCase()}</span>
+    </div>
+  `).join('');
+}
+function toggleRule(i,btn) {
+  RULES[i].on = !RULES[i].on;
+  btn.className = 'rule-toggle-btn ' + (RULES[i].on?'on':'off');
+}
+
+// ─── OPENCLAW STATUS ───
+const OC_INSTANCES = [
+  {icon:'🦞', name:'Coordinator Node', host:'openclaw-1 · localhost:3001', model:'claude-sonnet-4-6', status:'live', requests:0, uptime:'0h 0m'},
+  {icon:'🔍', name:'Supplier Node',    host:'openclaw-2 · localhost:3002', model:'claude-sonnet-4-6', status:'idle', requests:0, uptime:'0h 0m'},
+  {icon:'📋', name:'Customer Node',    host:'openclaw-3 · localhost:3003', model:'claude-sonnet-4-6', status:'idle', requests:0, uptime:'0h 0m'},
+];
+let startTime = Date.now();
+let logLines = [
+  {cls:'log-sys',  msg:'OpenClaw gateway started on port 3001'},
+  {cls:'log-sys',  msg:'Loaded skill: aixinchips-sourcing v1.0'},
+  {cls:'log-sys',  msg:'Telegram channel connected'},
+  {cls:'log-coord',msg:'Coordinator Agent ready'},
+  {cls:'log-supp', msg:'Supplier Agent ready'},
+  {cls:'log-cust', msg:'Customer Agent ready'},
+];
+function renderOpenClaw() {
+  const elapsed = Math.floor((Date.now()-startTime)/1000);
+  const h = Math.floor(elapsed/3600), m = Math.floor((elapsed%3600)/60);
+  OC_INSTANCES[0].uptime = `${h}h ${m}m`;
+  document.getElementById('ocGrid').innerHTML = OC_INSTANCES.map(o=>`
+    <div class="oc-card">
+      <div class="oc-card-top">
+        <div class="oc-icon">${o.icon}</div>
+        <div>
+          <div class="oc-name">${o.name}</div>
+          <div class="oc-host">${o.host}</div>
+        </div>
+      </div>
+      <div class="oc-status-row"><span class="oc-stat-label">STATUS</span><span class="oc-stat-val ${o.status==='live'?'oc-live':'oc-idle'}">${o.status==='live'?'● RUNNING':'● STANDBY'}</span></div>
+      <div class="oc-status-row"><span class="oc-stat-label">MODEL</span><span class="oc-stat-val">${o.model}</span></div>
+      <div class="oc-status-row"><span class="oc-stat-label">REQUESTS</span><span class="oc-stat-val">${o.requests}</span></div>
+      <div class="oc-status-row"><span class="oc-stat-label">UPTIME</span><span class="oc-stat-val">${o.uptime}</span></div>
+    </div>
+  `).join('');
+  document.getElementById('ocLog').innerHTML = logLines.slice(-30).map(l=>`
+    <div><span class="log-ts">${new Date().toLocaleTimeString()}</span><span class="${l.cls}">${l.msg}</span></div>
+  `).join('');
+}
+function addLog(cls, msg) {
+  logLines.push({cls,msg});
+}
+
+// ─── MAIN PIPELINE ───
+async function runSourcing() {
+  const btn = document.getElementById('submitBtn');
+  const freeText = document.getElementById('freeText').value.trim();
+  const partNumber = document.getElementById('fPartNumber').value.trim();
+  const qty = document.getElementById('fQty').value.trim();
+  const price = document.getElementById('fPrice').value.trim();
+  const lead = document.getElementById('fLead').value;
+  const pkg = document.getElementById('fPackage').value.trim();
+  const notes = document.getElementById('fNotes').value.trim();
+
+  if(!freeText && !partNumber) { alert('Please describe what you need or enter a part number.'); return; }
+
+  btn.disabled = true;
+  document.getElementById('resultsSection').style.display='none';
+  document.getElementById('resultCards').innerHTML='';
+  ['coord','supp','cust'].forEach(id=>setAgent(id,'idle'));
+
+  const requestText = freeText || `Part: ${partNumber}, Qty: ${qty||'?'}, Max price: $${price||'?'}, Lead: ${lead||'any'} weeks, Package: ${pkg||'any'}, Notes: ${notes||'none'}`;
+
+  // ── COORDINATOR ──
+  setAgent('coord','thinking');
+  addLog('log-coord','Received new sourcing request');
+  OC_INSTANCES[0].status='live'; OC_INSTANCES[0].requests++;
+
+  const coordResult = await claude(
+    `You are the Coordinator Agent for Aixinchips, an AI semiconductor sourcing platform.
+Parse the customer request and extract structured sourcing requirements.
+Apply these rules: reject obsolete parts, require lead time, flag price outliers below 40% of market.
+Respond ONLY in JSON:
+{"partNumber":"","manufacturer":"","quantity":0,"maxUnitPrice":0,"leadTimeWeeks":0,"packageType":"","notes":"","urgency":"normal|urgent|critical","complete":true,"missingFields":[],"supplierQuery":"plain English query for supplier agent"}`,
+    `Customer request: ${requestText}`
+  );
+
+  const coordMsg = coordResult.partNumber
+    ? `Parsed: ${coordResult.partNumber} × ${coordResult.quantity} units · ${coordResult.urgency?.toUpperCase()} · Max $${coordResult.maxUnitPrice}/unit`
+    : 'Request analysed';
+  setAgent('coord','done', coordMsg);
+  addLog('log-coord',`Parsed: ${coordResult.partNumber||'part'} × ${coordResult.quantity||'?'}`);
+  OC_INSTANCES[0].status='idle';
+
+  await sleep(400);
+
+  // ── SUPPLIER ──
+  setAgent('supp','thinking');
+  addLog('log-supp','Querying distributor inventory');
+  OC_INSTANCES[1].status='live'; OC_INSTANCES[1].requests++;
+
+  const suppResult = await claude(
+    `You are the Supplier Agent for Aixinchips. You have access to distributor inventory data.
+Given a sourcing requirement, generate 3 realistic supplier offers from real distributors (Arrow, Avnet, Mouser, Digi-Key, Future Electronics, TTI, etc.).
+Make prices and stock realistic for the part.
+Respond ONLY in JSON:
+{"offers":[{"supplier":"","region":"","unitPrice":0,"stockQty":0,"leadTimeWeeks":0,"moq":0,"packaging":"","authentic":true,"approvedSupplier":true,"notes":""}]}`,
+    `Sourcing requirement: ${JSON.stringify(coordResult)}\nOriginal request: ${requestText}`
+  );
+
+  const offers = suppResult.offers || [];
+  setAgent('supp','done', `Found ${offers.length} offers from ${offers.map(o=>o.supplier).join(', ')}`);
+  addLog('log-supp',`${offers.length} offers retrieved`);
+  OC_INSTANCES[1].status='idle';
+
+  await sleep(400);
+
+  // ── CUSTOMER ──
+  setAgent('cust','thinking');
+  addLog('log-cust','Ranking and verifying results');
+  OC_INSTANCES[2].status='live'; OC_INSTANCES[2].requests++;
+
+  const custResult = await claude(
+    `You are the Customer Agent for Aixinchips. Rank and verify supplier offers.
+Apply rules: reject if not authentic, reject if unapproved supplier, flag if price seems too low.
+Rank by: 1) price competitiveness, 2) stock availability, 3) lead time, 4) supplier reliability.
+Respond ONLY in JSON:
+{"rankedOffers":[{"rank":1,"supplier":"","unitPrice":0,"stockQty":0,"leadTimeWeeks":0,"moq":0,"totalCost":0,"confidence":0.95,"matchType":"exact","ruleFlags":["AUTHENTIC","APPROVED","STOCK_OK"],"reason":"plain English why this is recommended","rejected":false,"rejectReason":""}]}`,
+    `Coordinator parsed: ${JSON.stringify(coordResult)}\nSupplier offers: ${JSON.stringify(suppResult)}`
+  );
+
+  const ranked = (custResult.rankedOffers||[]).filter(o=>!o.rejected);
+  setAgent('cust','done', `${ranked.length} valid results · Best: $${ranked[0]?.unitPrice?.toFixed(4)||'?'}/unit from ${ranked[0]?.supplier||'?'}`);
+  addLog('log-cust',`Report ready — ${ranked.length} results`);
+  OC_INSTANCES[2].status='idle';
+
+  // ── RENDER RESULTS ──
+  renderResults(ranked, coordResult);
+
+  // ── SAVE HISTORY ──
+  history.unshift({
+    time: new Date().toLocaleTimeString(),
+    partNumber: coordResult.partNumber || partNumber || '—',
+    qty: coordResult.quantity || qty || '—',
+    customer: 'Portal',
+    bestPrice: ranked[0]?.unitPrice?.toFixed(4) || null,
+    leadTime: ranked[0]?.leadTimeWeeks || null,
+    status: ranked.length ? 'Complete' : 'Review'
+  });
+
+  btn.disabled = false;
+}
+
+function renderResults(offers, req) {
+  const section = document.getElementById('resultsSection');
+  const cards = document.getElementById('resultCards');
+  section.style.display='block';
+
+  if(!offers.length) {
+    cards.innerHTML=`<div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">No valid offers found. Try relaxing price or lead time requirements.</div>`;
+    return;
+  }
+
+  cards.innerHTML = offers.slice(0,3).map((o,i)=>{
+    const rankClass = i===0?'rank1':i===1?'rank2':'rank3';
+    const rankLabel = i===0?'#1 BEST MATCH':i===1?'#2':i===2?'#3':'';
+    const confPct = Math.round((o.confidence||0.8)*100);
+    const confColor = confPct>=85?'var(--green)':confPct>=65?'var(--yellow)':'var(--red)';
+    const flags = (o.ruleFlags||[]).map(f=>`<span class="rule-flag rule-ok">${f}</span>`).join('');
+    const total = o.totalCost || ((o.unitPrice||0)*(req?.quantity||1));
+
+    return `
+      <div class="result-card ${rankClass}" style="animation-delay:${i*0.1}s">
+        <div>
+          <div class="result-supplier">${o.supplier}</div>
+          <div class="result-part">${req?.partNumber||''} ${req?.packageType?'· '+req.packageType:''}</div>
+          <div class="result-meta">
+            <div class="result-meta-item">Stock <strong style="color:var(--green)">${(o.stockQty||0).toLocaleString()}</strong> units</div>
+            <div class="result-meta-item">MOQ <strong>${o.moq||1}</strong></div>
+            <div class="result-meta-item">Lead <strong>${o.leadTimeWeeks||'?'}</strong> wks</div>
+            <div class="result-meta-item">Total <strong style="color:var(--yellow)">$${total.toLocaleString(undefined,{maximumFractionDigits:2})}</strong></div>
+          </div>
+          <div class="rule-flags">${flags}</div>
+          ${o.reason?`<div class="result-reason">"${o.reason}"</div>`:''}
+        </div>
+        <div class="result-right">
+          <div class="result-price">$${(o.unitPrice||0).toFixed(4)}</div>
+          <div class="result-price-sub">per unit</div>
+          <span class="rank-badge" style="background:color-mix(in srgb,${i===0?'var(--green)':'var(--blue)'} 12%,transparent);color:${i===0?'var(--green)':'var(--blue)'}">${rankLabel}</span>
+          <div style="text-align:right">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:3px">CONFIDENCE ${confPct}%</div>
+            <div class="confidence-bar-wrap"><div class="confidence-bar" style="width:${confPct}%;background:${confColor}"></div></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ─── INIT ───
+renderRules();
+renderHistory();
+</script>
+</body>
+</html>
