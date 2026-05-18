@@ -537,16 +537,43 @@ Be professional and concise.`;
     // Save confirmed order to supplier requests
     if (msg.toLowerCase().includes('confirm')) {
       const orderId = 'ORD-' + Date.now().toString().slice(-6);
-      const lastAgentMsg = buyerHistory.filter(h => h.role === 'assistant').slice(-2)[0]?.content || '';
-      const partMatch = lastAgentMsg.match(/ESP32|STM32|ATMEGA|Raspberry Pi|DHT22|nRF24|RP2040|BMP280/i);
-      const qtyMatch = lastAgentMsg.match(/Quantity[^:]*:\s*(\d+)|(\d+)\s+units/i);
-      const priceMatch = lastAgentMsg.match(/Total[^:]*:\s*\$?([\d.]+)/i);
-      const supplierMatch = lastAgentMsg.match(/Supplier[^:]*:\s*([^\n]+)/i);
-      const part = partMatch ? partMatch[0] : 'Component';
-      const qty = qtyMatch ? parseInt(qtyMatch[1] || qtyMatch[2]) : 0;
-      const total = priceMatch ? '$' + priceMatch[1] : 'TBD';
-      const supplierName = supplierMatch ? supplierMatch[1].trim() : '';
-      const matchingSupplier = suppliers.find(s => supplierName && s.company.toLowerCase().includes(supplierName.toLowerCase())) || suppliers[0];
+      // Look at last two agent messages for order details
+      const agentMsgs = buyerHistory.filter(h => h.role === 'assistant');
+      const lastAgentMsg = agentMsgs[agentMsgs.length - 1]?.content || '';
+      const prevAgentMsg = agentMsgs[agentMsgs.length - 2]?.content || '';
+      const combinedMsgs = lastAgentMsg + ' ' + prevAgentMsg;
+
+      // Extract part name
+      const partMatch = combinedMsgs.match(/ESP32[\w-]*|STM32[\w-]*|ATMEGA[\w-]*|Raspberry Pi[\w\s]*\dB?|DHT\d+|nRF[\w+]+|RP2040|BMP280/i);
+      const part = partMatch ? partMatch[0].trim() : 'Component';
+
+      // Extract quantity
+      const qtyMatch = combinedMsgs.match(/Quantity[^:]*:\s*\*?\*?(\d+)|\*\*(\d+)\s+units?\*\*|(\d+)\s+units?/i);
+      const qty = qtyMatch ? parseInt(qtyMatch[1] || qtyMatch[2] || qtyMatch[3]) : 0;
+
+      // Extract total
+      const totalMatch = combinedMsgs.match(/Total[^:]*:\s*\*?\*?\$?([\d,]+(?:\.\d+)?)/i);
+      const total = totalMatch ? '$' + totalMatch[1] : 'TBD';
+
+      // Find supplier — only check the LAST agent message to avoid matching old messages
+      let matchingSupplier = null;
+      for (const s of suppliers) {
+        if (lastAgentMsg.toLowerCase().includes(s.company.toLowerCase())) {
+          matchingSupplier = s;
+          break;
+        }
+      }
+      // If not found in last message, check previous agent message
+      if (!matchingSupplier) {
+        for (const s of suppliers) {
+          if (prevAgentMsg.toLowerCase().includes(s.company.toLowerCase())) {
+            matchingSupplier = s;
+            break;
+          }
+        }
+      }
+      if (!matchingSupplier) matchingSupplier = suppliers[0];
+
       if (matchingSupplier) {
         await db('requests', 'POST', {
           supplier_id: matchingSupplier.id,
