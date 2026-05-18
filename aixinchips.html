@@ -346,7 +346,7 @@ tbody tr:hover td{background:var(--off)}
 // ===== CONFIG =====
 const SUPABASE_URL = 'https://qkgpjhnmnsdtwpmlrimk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_a-VHc3ic2kpkFUmSZazuXQ_A-RLHpWd';
-const ANTHROPIC_KEY = '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';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx--KCBexJTOLoLcoCKuKHF3yS1kOFnQx7C2wgx9qBS_6UhQR9Vzi2WE7MHhkwEjJqZ/exec';
 
 let currentUser = null;
 let userType = 'customer';
@@ -369,25 +369,19 @@ async function db(table, method='GET', body=null, filter='') {
   return text ? JSON.parse(text) : [];
 }
 
-// ===== CLAUDE API =====
+// ===== CLAUDE API (via Google Apps Script proxy) =====
 async function claude(systemPrompt, messages) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01'
-    },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1000,
-      system: systemPrompt,
+      systemPrompt,
       messages: Array.isArray(messages) ? messages : [{ role: 'user', content: messages }]
     })
   });
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.content[0].text;
+  if (data.error) throw new Error(data.error);
+  return data.reply;
 }
 
 // ===== AUTH =====
