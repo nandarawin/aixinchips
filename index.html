@@ -548,8 +548,8 @@ Be professional and concise.`;
       const part = partMatch ? partMatch[0].trim() : 'Component';
 
       // Extract quantity
-      const qtyMatch = combinedMsgs.match(/Quantity[^:]*:\s*\*?\*?(\d+)|\*\*(\d+)\s+units?\*\*|(\d+)\s+units?/i);
-      const qty = qtyMatch ? parseInt(qtyMatch[1] || qtyMatch[2] || qtyMatch[3]) : 0;
+    const qtyMatch = msg.match(/(\d+)\s+(?:units?|pcs?|pieces?)/i) || msg.match(/(\d+)\s+\w/i);
+const qty = qtyMatch ? parseInt(qtyMatch[1]) : 0;
 
       // Extract total
       const totalMatch = combinedMsgs.match(/Total[^:]*:\s*\*?\*?\$?([\d,]+(?:\.\d+)?)/i);
@@ -599,7 +599,7 @@ async function loadOrders() {
     const body = document.getElementById('bOrdersBody');
     if (!orders.length) { body.innerHTML = '<div class="empty">No orders yet.</div>'; return; }
     body.innerHTML = '<table><thead><tr><th>Request</th><th>Time</th><th>Status</th></tr></thead><tbody>' +
-      orders.map(o => `<tr><td style="font-weight:500;max-width:400px;">${o.message}</td><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:12px;">${new Date(o.created_at).toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('') +
+      orders.map(o => `<tr><td style="font-weight:500;max-width:400px;">${o.message}</td><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:12px;">${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('') +
       '</tbody></table>';
   } catch(e) {}
 }
@@ -712,7 +712,7 @@ async function loadRequests() {
       <div class="req-card" onclick="showOrderDetail(${JSON.stringify(r).replace(/"/g,'&quot;')})">
         <div class="req-info">
           <h4>${r.buyer_email || r.buyer_company || r.customer} — ${r.part}${r.qty ? ' × ' + r.qty : ''}</h4>
-          <p>${r.order_ref || 'Order'} · ${r.total || ''} · ${new Date(r.created_at).toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur'})}</p>
+          <p>${r.order_ref || 'Order'} · ${r.total || ''} · ${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</p>
         </div>
         <span class="tag green">${r.status}</span>
       </div>`).join('');
