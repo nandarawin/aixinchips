@@ -23,7 +23,6 @@ body{background:var(--off);color:var(--text);font-family:'DM Sans',sans-serif;mi
 .btn-lg{padding:14px 32px;font-size:14px;border-radius:8px}
 .btn-full{width:100%;justify-content:center;margin-top:8px;padding:13px}
 .btn-sm{padding:7px 14px;font-size:12px}
-/* LANDING */
 #landing{display:flex;flex-direction:column;min-height:100vh}
 .land-nav{display:flex;justify-content:space-between;align-items:center;padding:0 64px;height:68px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .land-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}.land-logo span{color:var(--accent)}
@@ -49,7 +48,6 @@ body{background:var(--off);color:var(--text);font-family:'DM Sans',sans-serif;mi
 .land-stat{padding:28px 48px;border-right:1px solid var(--border)}.land-stat:last-child{border-right:none}
 .land-stat-num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;margin-bottom:4px}
 .land-stat-label{font-size:12px;color:var(--text3);font-weight:500}
-/* AUTH */
 #auth{display:none;min-height:100vh}
 .auth-layout{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
 .auth-left{background:var(--accent);padding:64px;display:flex;flex-direction:column;justify-content:space-between}
@@ -70,7 +68,6 @@ body{background:var(--off);color:var(--text);font-family:'DM Sans',sans-serif;mi
 .auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--text3)}
 .auth-switch a{color:var(--accent);cursor:pointer;font-weight:600}
 .auth-err{background:var(--dangerl);color:var(--danger);border:1px solid #f5c6c2;border-radius:6px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
-/* SHELL */
 .shell{display:none;min-height:100vh;flex-direction:column}
 .plat-nav{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .plat-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}.plat-logo span{color:var(--accent)}
@@ -95,7 +92,6 @@ body{background:var(--off);color:var(--text);font-family:'DM Sans',sans-serif;mi
 .stat-b-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
 .stat-b-val{font-family:'Playfair Display',serif;font-size:30px;font-weight:700}
 .stat-b-val.blue{color:var(--accent)}.stat-b-val.green{color:var(--supp)}.stat-b-val.gold{color:var(--gold)}
-/* CHAT */
 .chat-wrap{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;height:calc(100vh - 260px);display:flex;flex-direction:column}
 .chat-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
 .chat-head-info h3{font-size:14px;font-weight:600}
@@ -192,7 +188,7 @@ tbody tr:hover td{background:var(--off)}
   <div class="land-stats">
     <div class="land-stat"><div class="land-stat-num">2m</div><div class="land-stat-label">Average response time</div></div>
     <div class="land-stat"><div class="land-stat-num">24/7</div><div class="land-stat-label">Agent availability</div></div>
-    <div class="land-stat"><div class="land-stat-num">AI</div><div class="land-stat-label">Powered by Claude</div></div>
+    <div class="land-stat"><div class="land-stat-num">AI</div><div class="land-stat-label">Powered by MiniMax</div></div>
     <div class="land-stat"><div class="land-stat-num">$0</div><div class="land-stat-label">Per transaction fee</div></div>
   </div>
 </div>
@@ -343,7 +339,6 @@ tbody tr:hover td{background:var(--off)}
 </div>
 
 <script>
-// ===== CONFIG =====
 const SUPABASE_URL = 'https://qkgpjhnmnsdtwpmlrimk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_a-VHc3ic2kpkFUmSZazuXQ_A-RLHpWd';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx--KCBexJTOLoLcoCKuKHF3yS1kOFnQx7C2wgx9qBS_6UhQR9Vzi2WE7MHhkwEjJqZ/exec';
@@ -353,7 +348,6 @@ let userType = 'customer';
 let authMode = 'signup';
 let buyerHistory = [];
 
-// ===== SUPABASE =====
 async function db(table, method='GET', body=null, filter='') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`, {
     method,
@@ -369,7 +363,6 @@ async function db(table, method='GET', body=null, filter='') {
   return text ? JSON.parse(text) : [];
 }
 
-// ===== CLAUDE API (via Google Apps Script proxy) =====
 async function claude(systemPrompt, messages) {
   const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
@@ -384,7 +377,6 @@ async function claude(systemPrompt, messages) {
   return data.reply;
 }
 
-// ===== AUTH =====
 function showLanding() {
   ['auth','buyer-shell','supplier-shell'].forEach(id => {
     const el = document.getElementById(id);
@@ -479,7 +471,6 @@ function logout() {
   showLanding();
 }
 
-// ===== BUYER =====
 function bPage(p) {
   document.querySelectorAll('#buyer-shell .plat-page').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('#buyer-shell .plat-tab').forEach(el => el.classList.remove('active'));
@@ -499,7 +490,6 @@ async function buyerSend() {
   const tid = addThinking('bMsgs', 'Contacting supplier agents');
 
   try {
-    // Get all supplier inventories
     const suppliers = await db('users', 'GET', null, '?type=eq.supplier');
     const invParts = await Promise.all(suppliers.map(async s => {
       const inv = await db('inventory', 'GET', null, `?user_id=eq.${s.id}&order=id.asc`);
@@ -529,46 +519,36 @@ Be professional and concise.`;
     removeThing(tid);
     addMsg('bMsgs', reply, 'agent', 'Agent');
 
-    // Save order
     if (msg.toLowerCase().match(/need|want|order|require/)) {
       await db('orders', 'POST', { user_id: currentUser.id, message: msg, reply, status: 'Quote Received' });
     }
 
-    // Save confirmed order to supplier requests
     if (msg.toLowerCase().includes('confirm')) {
       const orderId = 'ORD-' + Date.now().toString().slice(-6);
-      // Look at last two agent messages for order details
       const agentMsgs = buyerHistory.filter(h => h.role === 'assistant');
       const lastAgentMsg = agentMsgs[agentMsgs.length - 1]?.content || '';
       const prevAgentMsg = agentMsgs[agentMsgs.length - 2]?.content || '';
       const combinedMsgs = lastAgentMsg + ' ' + prevAgentMsg;
 
-      // Extract part name
       const partMatch = combinedMsgs.match(/ESP32[\w-]*|STM32[\w-]*|ATMEGA[\w-]*|Raspberry Pi[\w\s]*\dB?|DHT\d+|nRF[\w+]+|RP2040|BMP280/i);
       const part = partMatch ? partMatch[0].trim() : 'Component';
 
-      // Extract quantity
-    const qtyMatch = msg.match(/(\d+)\s+(?:units?|pcs?|pieces?)/i) || msg.match(/(\d+)\s+\w/i);
-const qty = qtyMatch ? parseInt(qtyMatch[1]) : 0;
+      const qtyMatch = msg.match(/(\d+)\s+(?:units?|pcs?|pieces?)/i) || msg.match(/(\d+)\s+\w/i);
+      const qty = qtyMatch ? parseInt(qtyMatch[1]) : 0;
 
-      // Extract total
       const totalMatch = combinedMsgs.match(/Total[^:]*:\s*\*?\*?\$?([\d,]+(?:\.\d+)?)/i);
       const total = totalMatch ? '$' + totalMatch[1] : 'TBD';
 
-      // Find supplier — only check the LAST agent message to avoid matching old messages
       let matchingSupplier = null;
       for (const s of suppliers) {
         if (lastAgentMsg.toLowerCase().includes(s.company.toLowerCase())) {
-          matchingSupplier = s;
-          break;
+          matchingSupplier = s; break;
         }
       }
-      // If not found in last message, check previous agent message
       if (!matchingSupplier) {
         for (const s of suppliers) {
           if (prevAgentMsg.toLowerCase().includes(s.company.toLowerCase())) {
-            matchingSupplier = s;
-            break;
+            matchingSupplier = s; break;
           }
         }
       }
@@ -618,7 +598,6 @@ async function loadSuppliers() {
   } catch(e) {}
 }
 
-// ===== SUPPLIER =====
 function sPage(p) {
   document.querySelectorAll('#supplier-shell .plat-page').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('#supplier-shell .plat-tab').forEach(el => { el.classList.remove('active','s'); });
@@ -656,8 +635,6 @@ For show: <inventory_update>{"action":"show"}</inventory_update>
 Be professional and confirm what you understood.`;
 
     const reply = await claude(systemPrompt, msg);
-
-    // Parse inventory update
     const updateMatch = reply.match(/<inventory_update>([\s\S]*?)<\/inventory_update>/);
     let cleanReply = reply.replace(/<inventory_update>[\s\S]*?<\/inventory_update>/g, '').trim();
 
@@ -712,18 +689,17 @@ async function loadRequests() {
       <div class="req-card" onclick="showOrderDetail(${JSON.stringify(r).replace(/"/g,'&quot;')})">
         <div class="req-info">
           <h4>${r.buyer_email || r.buyer_company || r.customer} — ${r.part}${r.qty ? ' × ' + r.qty : ''}</h4>
-          <p>${r.order_ref || 'Order'} · ${r.total || ''} · ${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</p>
+          <p>${r.order_ref || 'Order'} · ${r.total || ''} · ${new Date(r.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</p>
         </div>
         <span class="tag green">${r.status}</span>
       </div>`).join('');
-  } catch(e) {}
+  } catch(e) { console.log('loadRequests error:', e); }
 }
 
 function showOrderDetail(order) {
-  alert(`Order Reference: ${order.order_ref || 'N/A'}\nBuyer: ${order.buyer_email || order.buyer_company || order.customer}\nPart: ${order.part}\nQuantity: ${order.qty || 'N/A'}\nTotal: ${order.total || 'N/A'}\nStatus: ${order.status}\nDate: ${new Date(order.created_at).toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur'})}`);
+  alert(`Order Reference: ${order.order_ref || 'N/A'}\nBuyer: ${order.buyer_email || order.buyer_company || order.customer}\nPart: ${order.part}\nQuantity: ${order.qty || 'N/A'}\nTotal: ${order.total || 'N/A'}\nStatus: ${order.status}\nDate: ${new Date(order.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}`);
 }
 
-// ===== HELPERS =====
 function addMsg(containerId, text, role, who) {
   const el = document.getElementById(containerId);
   const cls = role === 'user' ? 'r' : '';
