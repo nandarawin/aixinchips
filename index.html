@@ -312,7 +312,30 @@ tbody tr:hover td{background:var(--off)}
       </div>
     </div>
     <div class="plat-page" id="s-inventory">
-      <div class="page-head"><div><h1>My Inventory</h1><p>Updated via your agent</p></div></div>
+      <div class="page-head">
+        <div><h1>My Inventory</h1><p>Updated via your agent or bulk upload</p></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-outline btn-sm" onclick="exportInvCSV()">Export CSV</button>
+          <button class="btn btn-supp btn-sm" onclick="toggleBulkPanel()">+ Bulk Upload</button>
+        </div>
+      </div>
+
+      <div id="bulkUploadPanel" style="display:none;background:var(--suppl);border:1px solid #c5dcc9;border-radius:10px;padding:20px 24px;margin-bottom:20px">
+        <div style="font-size:14px;font-weight:600;color:var(--supp);margin-bottom:4px">Bulk Upload Inventory</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Upload a CSV file with your parts. Required columns: <b>part, price, stock, moq, lead</b></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+          <input type="file" id="bulkCsvInput" accept=".csv" style="font-size:13px;padding:6px" />
+          <button class="btn btn-supp btn-sm" onclick="processBulkUpload()">Preview</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadSampleCSV()">Download Sample CSV</button>
+        </div>
+        <div id="bulkUploadStatus" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:8px"></div>
+        <div id="bulkPreviewTable" style="margin-top:12px;overflow-x:auto"></div>
+        <div id="bulkConfirmRow" style="display:none;margin-top:12px">
+          <button class="btn btn-supp" onclick="confirmBulkUpload()">Confirm & Save All</button>
+          <button class="btn btn-outline" style="margin-left:10px" onclick="cancelBulkUpload()">Cancel</button>
+        </div>
+      </div>
+
       <div class="stats-g">
         <div class="stat-b"><div class="stat-b-label">Total Parts</div><div class="stat-b-val blue" id="sTotP">0</div></div>
         <div class="stat-b"><div class="stat-b-label">Total Units</div><div class="stat-b-val green" id="sTotU">0</div></div>
@@ -725,6 +748,169 @@ document.addEventListener('keydown', e => {
 });
 
 showLanding();
+
+// ===== BULK UPLOAD =====
+let _bulkParsedRows = [];
+
+function toggleBulkPanel() {
+  const panel = document.getElementById('bulkUploadPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function downloadSampleCSV() {
+  const csv = 'part,price,stock,moq,lead\nESP32-WROOM-32E,2.80,500,10,3-5 days\nSTM32F103C8T6,2.90,1000,50,3-5 days\nATMEGA328P-PU,2.10,200,10,1 week';
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'sample_inventory.csv';
+  a.click();
+}
+
+function processBulkUpload() {
+  const file = document.getElementById('bulkCsvInput').files[0];
+  const statusEl = document.getElementById('bulkUploadStatus');
+  const previewEl = document.getElementById('bulkPreviewTable');
+  const confirmRow = document.getElementById('bulkConfirmRow');
+
+  if (!file) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--dangerl)';
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'Please select a CSV file first.';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'var(--dangerl)';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'CSV must have a header row and at least one data row.';
+      return;
+    }
+
+    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+    const required = ['part', 'price', 'stock'];
+    const missing = required.filter(r => !headers.includes(r));
+    if (missing.length) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'var(--dangerl)';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'Missing required columns: ' + missing.join(', ');
+      return;
+    }
+
+    _bulkParsedRows = lines.slice(1).map(line => {
+      const vals = line.split(',');
+      const row = {};
+      headers.forEach((h, i) => row[h] = (vals[i] || '').trim());
+      return row;
+    }).filter(r => r.part && r.price && r.stock);
+
+    if (!_bulkParsedRows.length) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'var(--dangerl)';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'No valid rows found in CSV.';
+      return;
+    }
+
+    // Show preview table
+    previewEl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;border:1px solid var(--border)">' +
+      '<thead><tr style="background:var(--off)">' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Part</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Price</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Stock</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">MOQ</th>' +
+      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Lead Time</th>' +
+      '</tr></thead><tbody>' +
+      _bulkParsedRows.map(r => `<tr style="border-bottom:1px solid var(--border2)">
+        <td style="padding:8px 12px;font-family:'DM Mono',monospace;font-size:12px">${r.part}</td>
+        <td style="padding:8px 12px">$${r.price}</td>
+        <td style="padding:8px 12px">${r.stock}</td>
+        <td style="padding:8px 12px">${r.moq || 1}</td>
+        <td style="padding:8px 12px">${r.lead || '—'}</td>
+      </tr>`).join('') +
+      '</tbody></table>';
+
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'var(--suppl)';
+    statusEl.style.color = 'var(--supp)';
+    statusEl.textContent = `${_bulkParsedRows.length} parts ready to upload. Review below and click Confirm.`;
+    confirmRow.style.display = 'block';
+  };
+  reader.readAsText(file);
+}
+
+async function confirmBulkUpload() {
+  const statusEl = document.getElementById('bulkUploadStatus');
+  const confirmRow = document.getElementById('bulkConfirmRow');
+
+  if (!_bulkParsedRows.length) return;
+
+  statusEl.style.display = 'block';
+  statusEl.style.background = 'var(--acl)';
+  statusEl.style.color = 'var(--accent)';
+  statusEl.textContent = 'Uploading...';
+  confirmRow.style.display = 'none';
+
+  let added = 0, updated = 0, failed = 0;
+
+  for (const row of _bulkParsedRows) {
+    try {
+      const existing = await db('inventory', 'GET', null,
+        `?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);
+      if (existing.length > 0) {
+        await db('inventory', 'PATCH',
+          { price: parseFloat(row.price), stock: parseInt(row.stock), moq: parseInt(row.moq) || 1, lead: row.lead || '3-5 days' },
+          `?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);
+        updated++;
+      } else {
+        await db('inventory', 'POST', {
+          user_id: currentUser.id,
+          part: row.part,
+          price: parseFloat(row.price),
+          stock: parseInt(row.stock),
+          moq: parseInt(row.moq) || 1,
+          lead: row.lead || '3-5 days'
+        });
+        added++;
+      }
+    } catch(e) { failed++; }
+  }
+
+  statusEl.textContent = `Done! ${added} added, ${updated} updated${failed ? ', ' + failed + ' failed' : ''}.`;
+  statusEl.style.background = 'var(--suppl)';
+  statusEl.style.color = 'var(--supp)';
+  _bulkParsedRows = [];
+  document.getElementById('bulkPreviewTable').innerHTML = '';
+  document.getElementById('bulkCsvInput').value = '';
+  loadSuppInv();
+}
+
+function cancelBulkUpload() {
+  _bulkParsedRows = [];
+  document.getElementById('bulkPreviewTable').innerHTML = '';
+  document.getElementById('bulkUploadStatus').style.display = 'none';
+  document.getElementById('bulkConfirmRow').style.display = 'none';
+  document.getElementById('bulkCsvInput').value = '';
+}
+
+async function exportInvCSV() {
+  try {
+    const inv = await db('inventory', 'GET', null, `?user_id=eq.${currentUser.id}&order=id.asc`);
+    if (!inv.length) { alert('No inventory to export.'); return; }
+    const headers = 'part,price,stock,moq,lead';
+    const rows = inv.map(i => `${i.part},${i.price},${i.stock},${i.moq},${i.lead}`);
+    const csv = [headers, ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'inventory_' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+  } catch(e) { alert('Export failed: ' + e.message); }
+}
+
 </script>
 </body>
 </html>
