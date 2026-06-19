@@ -4,151 +4,249 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aixinchips — AI Procurement Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --white:#fff;--off:#fafaf8;--light:#f4f3ef;--border:#dddbd4;--border2:#e8e6e0;
-  --text:#1a1916;--text2:#4a4844;--text3:#8a8880;
-  --accent:#1a3a5c;--acl:#eef3f8;
-  --supp:#2d5a3d;--suppl:#eef5f0;
-  --gold:#c8a96e;--goldl:#faf6ef;
-  --danger:#c0392b;--dangerl:#fdf0ee;
+  --bg:#0d1117;
+  --white:#0d1117;
+  --surface:#161b27;
+  --surface2:#1c2333;
+  --border:rgba(255,255,255,0.08);
+  --text:#e6edf3;
+  --text2:#8b949e;
+  --text3:#484f58;
+  --purple:#a78bfa;
+  --purple2:#7c3aed;
+  --purple3:#c4b5fd;
+  --purplel:rgba(167,139,250,0.1);
+  --cyan:#38bdf8;
+  --cyanl:rgba(56,189,248,0.1);
+  --orange:#fb923c;
+  --orangel:rgba(251,146,60,0.1);
+  --green:#34d399;
+  --greenl:rgba(52,211,153,0.1);
+  --danger:#f87171;
+  --dangerl:rgba(248,113,113,0.1);
+  --gold:#fbbf24;
+  --goldl:rgba(251,191,36,0.1);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--off);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;font-size:14px;line-height:1.6}
-.btn{padding:10px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--border)}.btn-outline:hover{border-color:var(--text)}
-.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1e4a72}
-.btn-supp{background:var(--supp);color:#fff}.btn-supp:hover{background:#1e4a2a}
-.btn-lg{padding:14px 32px;font-size:14px;border-radius:8px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px;line-height:1.6;overflow-x:hidden}
+
+/* BUTTONS */
+.btn{padding:10px 22px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--border)}.btn-outline:hover{border-color:var(--purple);color:var(--purple)}
+.btn-primary{background:var(--purple);color:#fff}.btn-primary:hover{background:var(--purple2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(124,58,237,0.35)}
+.btn-supp{background:var(--orange);color:#fff}.btn-supp:hover{background:#ea6c0a;transform:translateY(-1px);box-shadow:0 4px 16px rgba(249,115,22,0.35)}
+.btn-lg{padding:14px 32px;font-size:15px;border-radius:10px}
 .btn-full{width:100%;justify-content:center;margin-top:8px;padding:13px}
 .btn-sm{padding:7px 14px;font-size:12px}
+
+/* NAV */
 #landing{display:flex;flex-direction:column;min-height:100vh}
-.land-nav{display:flex;justify-content:space-between;align-items:center;padding:0 64px;height:68px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.land-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}.land-logo span{color:var(--accent)}
+.land-nav{display:flex;justify-content:space-between;align-items:center;padding:0 60px;height:68px;background:rgba(13,17,23,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.land-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;color:var(--text)}.land-logo span{color:var(--purple)}
 .land-nav-actions{display:flex;gap:10px}
-.land-hero{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 68px)}
-.hero-left{padding:80px 64px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border)}
-.hero-eye{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.hero-eye::before{content:'';display:block;width:24px;height:1px;background:var(--accent)}
-.hero-left h1{font-family:'Playfair Display',serif;font-size:clamp(36px,4vw,58px);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:24px}
-.hero-left h1 em{font-style:italic;color:var(--accent)}
-.hero-left p{font-size:16px;color:var(--text2);line-height:1.8;max-width:480px;margin-bottom:40px;font-weight:300}
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
-.hero-right{background:var(--light);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 64px;gap:16px}
-.acct-card{width:100%;max-width:360px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:28px;cursor:pointer;transition:all .2s}
-.acct-card:hover{border-color:var(--accent);box-shadow:0 4px 20px rgba(26,58,92,.08)}
-.acct-card-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
-.acct-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;font-family:'DM Mono',monospace}
-.acct-icon.b{background:var(--acl);color:var(--accent)}.acct-icon.s{background:var(--suppl);color:var(--supp)}
-.acct-card h3{font-size:16px;font-weight:600}
-.acct-card p{font-size:13px;color:var(--text2);line-height:1.6}
-.acct-card-foot{margin-top:16px;text-align:right;font-size:13px;font-weight:600;color:var(--accent)}
-.land-stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);background:var(--white)}
-.land-stat{padding:28px 48px;border-right:1px solid var(--border)}.land-stat:last-child{border-right:none}
-.land-stat-num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;margin-bottom:4px}
-.land-stat-label{font-size:12px;color:var(--text3);font-weight:500}
+
+/* HERO */
+.land-hero{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 68px);position:relative;overflow:hidden;background:
+    radial-gradient(ellipse 900px 700px at 72% 38%, rgba(167,139,250,0.20), transparent 60%),
+    radial-gradient(ellipse 700px 600px at 80% 55%, rgba(56,189,248,0.16), transparent 65%),
+    radial-gradient(ellipse 600px 500px at 15% 80%, rgba(52,211,153,0.08), transparent 70%),
+    var(--bg)}
+
+/* glowing chip centerpiece, sits behind the account cards like the cube in the reference photo */
+.hero-chip-wrap{position:absolute;top:46%;right:2%;transform:translateY(-50%);width:600px;height:600px;z-index:0;pointer-events:none;opacity:0.85}
+.hero-chip-glow{position:absolute;inset:0;background:radial-gradient(circle at center, rgba(167,139,250,0.45), rgba(56,189,248,0.22) 45%, transparent 72%);filter:blur(14px);animation:chipPulse 5s ease-in-out infinite}
+@keyframes chipPulse{0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+.hero-chip-svg{position:absolute;inset:0;width:100%;height:100%}
+
+.hero-left{padding:80px 64px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.hero-right{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;padding:80px 48px;position:relative;z-index:2}
+
+.hero-eye{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:20px;display:flex;align-items:center;gap:10px;opacity:0;animation:fadeUp .6s .2s forwards}
+.hero-eye::before{content:'';display:block;width:24px;height:2px;background:var(--purple);border-radius:1px}
+
+.hero-left h1{font-family:'Playfair Display',serif;font-size:clamp(36px,4vw,60px);font-weight:700;line-height:1.08;letter-spacing:-1.5px;margin-bottom:20px;opacity:0;animation:fadeUp .6s .35s forwards;color:var(--text)}
+.hero-left h1 em{font-style:italic;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.hero-left p{font-size:17px;color:var(--text2);line-height:1.6;margin-bottom:0;font-weight:400;opacity:0;animation:fadeUp .6s .5s forwards}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:fadeUp .6s .65s forwards;margin-top:0}
+
+/* ACCOUNT CARDS */
+.acct-card{width:100%;max-width:320px;background:rgba(13,17,23,0.55);backdrop-filter:blur(4px);border:1px solid rgba(167,139,250,0.25);border-radius:4px;padding:22px 24px;cursor:pointer;transition:all .3s;opacity:0;position:relative}
+.acct-card.buyer{animation:fadeUp .6s .5s forwards;border-color:rgba(167,139,250,0.25)}
+.acct-card.supp{animation:fadeUp .6s .65s forwards;border-color:rgba(251,146,60,0.25)}
+/* corner tick marks like PCB silkscreen */
+.acct-card::before,.acct-card::after{content:'';position:absolute;width:10px;height:10px;border-color:inherit}
+.acct-card::before{top:-1px;left:-1px;border-top:2px solid;border-left:2px solid}
+.acct-card::after{bottom:-1px;right:-1px;border-bottom:2px solid;border-right:2px solid}
+.acct-card.buyer:hover{border-color:rgba(167,139,250,0.7);box-shadow:0 0 20px rgba(167,139,250,0.2),inset 0 0 20px rgba(167,139,250,0.04)}
+.acct-card.supp:hover{border-color:rgba(251,146,60,0.7);box-shadow:0 0 20px rgba(251,146,60,0.2),inset 0 0 20px rgba(251,146,60,0.04)}
+.acct-card-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.acct-icon{width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0;border:1px solid}
+.acct-icon.b{background:rgba(167,139,250,0.1);color:var(--purple);border-color:rgba(167,139,250,0.4)}
+.acct-icon.s{background:rgba(251,146,60,0.1);color:var(--orange);border-color:rgba(251,146,60,0.4)}
+.acct-card h3{font-size:13px;font-weight:600;color:var(--text);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+.acct-card p{font-size:12px;color:var(--text2);line-height:1.5}
+.acct-card-foot{margin-top:14px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.acct-card-foot.b{color:var(--purple)}.acct-card-foot.s{color:var(--orange)}
+
+/* STATS */
+.land-stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);background:var(--surface)}
+.land-stat{padding:24px 36px;border-right:1px solid var(--border);transition:background .2s}
+.land-stat:last-child{border-right:none}
+.land-stat:hover{background:var(--surface2)}
+.land-stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:4px;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.land-stat-label{font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+
+/* floating orbs animation in hero */
+.orb{position:absolute;border-radius:50%;pointer-events:none;animation:orbFloat linear infinite}
+@keyframes orbFloat{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100px) scale(1);opacity:0}}
+
+/* AUTH */
 #auth{display:none;min-height:100vh}
 .auth-layout{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
-.auth-left{background:var(--accent);padding:64px;display:flex;flex-direction:column;justify-content:space-between}
-.auth-left.supp-side{background:var(--supp)}
-.auth-left-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:rgba(255,255,255,.9)}
-.auth-left h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:16px}
-.auth-left p{font-size:15px;color:rgba(255,255,255,.65);line-height:1.8}
-.auth-right{padding:64px;display:flex;align-items:center;justify-content:center;background:var(--white)}
+.auth-left{background:
+    radial-gradient(ellipse 600px 500px at 25% 20%, rgba(167,139,250,0.28), transparent 60%),
+    radial-gradient(ellipse 500px 450px at 80% 75%, rgba(56,189,248,0.18), transparent 65%),
+    radial-gradient(ellipse 400px 400px at 10% 90%, rgba(52,211,153,0.10), transparent 70%),
+    var(--bg);
+  padding:64px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;border-right:1px solid var(--border)}
+.auth-left::before{content:'';position:absolute;top:-120px;right:-120px;width:420px;height:420px;background:radial-gradient(circle,rgba(167,139,250,0.25),transparent 70%);filter:blur(4px);pointer-events:none;animation:chipPulse 6s ease-in-out infinite}
+.auth-left::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:
+    linear-gradient(rgba(167,139,250,0.5) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(167,139,250,0.5) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(167,139,250,0.7) 2px, transparent 2px);
+  background-size:80px 80px, 80px 80px, 80px 80px;
+  mask-image:radial-gradient(ellipse 550px 550px at 75% 25%, black, transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse 550px 550px at 75% 25%, black, transparent 75%)}
+.auth-left.supp-side::before{background:radial-gradient(circle,rgba(251,146,60,0.25),transparent 70%)}
+.auth-left.supp-side::after{background-image:
+    linear-gradient(rgba(251,146,60,0.5) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(251,146,60,0.5) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(251,146,60,0.7) 2px, transparent 2px)}
+.auth-left-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text);position:relative;z-index:1}
+.auth-left-logo span{color:var(--purple)}
+.auth-left h2{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;line-height:1.2;margin-bottom:16px;position:relative;z-index:1;background:linear-gradient(135deg,#fff,var(--purple3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.auth-left.supp-side h2{background:linear-gradient(135deg,#fff,var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.auth-left p{font-size:15px;color:var(--text2);line-height:1.8;position:relative;z-index:1}
+.auth-right{padding:64px;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .auth-form{width:100%;max-width:400px}
-.auth-back{font-size:12px;color:var(--text3);cursor:pointer;margin-bottom:40px;display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace}
-.auth-back:hover{color:var(--text)}
+.auth-back{font-size:12px;color:var(--text3);cursor:pointer;margin-bottom:40px;display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;transition:color .2s}
+.auth-back:hover{color:var(--purple)}
 .auth-form h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:6px}
 .auth-form>p{font-size:13px;color:var(--text2);margin-bottom:32px}
 .f-field{margin-bottom:18px}
-.f-label{display:block;font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.3px;margin-bottom:6px}
-.f-input{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:all .2s}
-.f-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,58,92,.06)}
+.f-label{display:block;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.f-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;transition:all .2s}
+.f-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1)}
+.f-input::placeholder{color:var(--text3)}
 .auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--text3)}
-.auth-switch a{color:var(--accent);cursor:pointer;font-weight:600}
-.auth-err{background:var(--dangerl);color:var(--danger);border:1px solid #f5c6c2;border-radius:6px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
-.shell{display:none;min-height:100vh;flex-direction:column}
-.plat-nav{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.plat-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}.plat-logo span{color:var(--accent)}
-.plat-nav-left{display:flex;align-items:center;gap:28px}
-.plat-tabs{display:flex;gap:4px}
-.plat-tab{padding:6px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-radius:6px;transition:all .15s}
-.plat-tab:hover{background:var(--light);color:var(--text)}
-.plat-tab.active{background:var(--acl);color:var(--accent);font-weight:600}
-.plat-tab.active.s{background:var(--suppl);color:var(--supp)}
+.auth-switch a{color:var(--purple);cursor:pointer;font-weight:600}
+.auth-err{background:var(--dangerl);color:var(--danger);border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+
+/* APP SHELL */
+.shell{display:none;min-height:100vh;flex-direction:column;background:var(--bg)}
+.plat-nav{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.plat-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text)}.plat-logo span{color:var(--purple)}
+.plat-nav-left{display:flex;align-items:center;gap:24px}
+.plat-tabs{display:flex;gap:2px}
+.plat-tab{padding:6px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-radius:6px;transition:all .15s}
+.plat-tab:hover{background:var(--surface2);color:var(--purple)}
+.plat-tab.active{background:var(--surface2);color:var(--purple);font-weight:600}
+.plat-tab.active.s{background:var(--orangel);color:var(--orange)}
 .plat-nav-right{display:flex;align-items:center;gap:12px}
 .plat-user{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text2)}
-.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'DM Mono',monospace}
-.av.b{background:var(--acl);color:var(--accent);border:1.5px solid rgba(26,58,92,.2)}
-.av.s{background:var(--suppl);color:var(--supp);border:1.5px solid rgba(45,90,61,.2)}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.av.b{background:var(--surface2);color:var(--purple);border:1.5px solid rgba(124,58,237,0.2)}
+.av.s{background:var(--orangel);color:var(--orange);border:1.5px solid rgba(249,115,22,0.2)}
 .plat-body{flex:1}
-.plat-page{display:none;padding:36px 40px}.plat-page.active{display:block}
-.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border2)}
-.page-head h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px}
+.plat-page{display:none;padding:32px 40px}.plat-page.active{display:block;animation:fadeIn .3s ease}
+
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.page-head h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:4px;color:var(--text)}
 .page-head p{font-size:13px;color:var(--text3)}
+
 .stats-g{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.stat-b{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:20px 22px}
-.stat-b-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.stat-b{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 22px;transition:box-shadow .2s}
+.stat-b:hover{box-shadow:0 4px 16px rgba(124,58,237,0.08)}
+.stat-b-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
 .stat-b-val{font-family:'Playfair Display',serif;font-size:30px;font-weight:700}
-.stat-b-val.blue{color:var(--accent)}.stat-b-val.green{color:var(--supp)}.stat-b-val.gold{color:var(--gold)}
-.chat-wrap{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;height:calc(100vh - 260px);display:flex;flex-direction:column}
-.chat-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.chat-head-info h3{font-size:14px;font-weight:600}
-.chat-head-info p{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
+.stat-b-val.blue{color:var(--purple)}.stat-b-val.green{color:var(--green)}.stat-b-val.gold{color:var(--gold)}
+
+.chat-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;height:calc(100vh - 260px);display:flex;flex-direction:column}
+.chat-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface2)}
+.chat-head-info h3{font-size:14px;font-weight:600;color:var(--text)}
+.chat-head-info p{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 .chat-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
-.chat-status.b{color:var(--accent)}.chat-status.s{color:var(--supp)}
+.chat-status.b{color:var(--purple)}.chat-status.s{color:var(--orange)}
 .sdot{width:6px;height:6px;border-radius:50%;animation:blink 2s infinite}
-.sdot.b{background:var(--accent)}.sdot.s{background:var(--supp)}
+.sdot.b{background:var(--purple)}.sdot.s{background:var(--orange)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;background:var(--off)}
-.msg-row{display:flex;flex-direction:column;gap:3px}.msg-row.r{align-items:flex-end}
-.msg-who{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
-.msg-bub{max-width:72%;padding:11px 15px;border-radius:10px;font-size:13px;line-height:1.6}
-.msg-bub.user{background:var(--accent);color:#fff;border-bottom-right-radius:2px}
-.msg-bub.agent{background:var(--white);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:2px}
-.msg-bub.think{background:var(--white);border:1px solid var(--border);color:var(--text3);font-family:'DM Mono',monospace;font-size:12px;display:flex;align-items:center;gap:10px}
-.dots span{display:inline-block;width:5px;height:5px;background:var(--accent);border-radius:50%;animation:db 1.2s infinite}
+.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;background:var(--bg)}
+.chat-msgs::-webkit-scrollbar{width:4px}.chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.msg-row{display:flex;flex-direction:column;gap:4px}.msg-row.r{align-items:flex-end}
+.msg-who{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase}
+.msg-bub{max-width:72%;padding:12px 16px;border-radius:12px;font-size:13px;line-height:1.7}
+.msg-bub.user{background:var(--purple);color:#fff;border-bottom-right-radius:3px}
+.msg-bub.agent{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:3px}
+.msg-bub.think{background:var(--white);border:1px solid var(--border);color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;gap:10px;padding:10px 14px}
+.dots span{display:inline-block;width:5px;height:5px;background:var(--purple);border-radius:50%;animation:db 1.2s infinite}
 .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
-@keyframes db{0%,80%,100%{transform:scale(.8)}40%{transform:scale(1.2)}}
+@keyframes db{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1.2);opacity:1}}
 .chat-foot{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;background:var(--white)}
-.chat-input{flex:1;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);resize:none;outline:none;transition:border-color .2s}
-.chat-input:focus{border-color:var(--accent)}.chat-input.s:focus{border-color:var(--supp)}
-.chat-send{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
-.chat-send:hover{background:#1e4a72}.chat-send.s{background:var(--supp)}.chat-send.s:hover{background:#1e4a2a}
-.chat-send:disabled{opacity:.5;cursor:not-allowed}
+.chat-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);resize:none;outline:none;transition:all .2s}
+.chat-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.08)}
+.chat-input.s:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,0.08)}
+.chat-input::placeholder{color:var(--text3)}
+.chat-send{background:var(--purple);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.chat-send:hover{background:var(--purple2);box-shadow:0 4px 12px rgba(124,58,237,0.3)}
+.chat-send.s{background:var(--orange)}.chat-send.s:hover{background:#ea6c0a;box-shadow:0 4px 12px rgba(249,115,22,0.3)}
+.chat-send:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
 .inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
-.inv-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:20px;border-left:3px solid var(--supp)}
-.inv-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:6px}
-.inv-price{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px}
-.inv-detail{font-size:12px;color:var(--text3);margin-top:2px}
-.inv-avail{font-size:11px;font-weight:600;margin-top:10px;color:var(--supp)}.inv-avail.low{color:var(--danger)}
-.tbl-wrap{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
-.tbl-head{padding:16px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600}
+.inv-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;border-left:3px solid var(--orange);transition:box-shadow .2s}
+.inv-card:hover{box-shadow:0 4px 16px rgba(249,115,22,0.1)}
+.inv-part{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.inv-price{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.inv-detail{font-size:12px;color:var(--text2);margin-top:2px}
+.inv-avail{font-size:11px;font-weight:600;margin-top:10px;color:var(--green)}.inv-avail.low{color:var(--danger)}
+
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.tbl-head{padding:16px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--surface2)}
 table{width:100%;border-collapse:collapse}
-th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:600;padding:11px 20px;text-align:left;border-bottom:1px solid var(--border);background:var(--off)}
-td{padding:13px 20px;border-bottom:1px solid var(--border2);font-size:13px}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;padding:11px 20px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg)}
+td{padding:13px 20px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
 tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:var(--off)}
+tbody tr:hover td{background:var(--surface2);color:var(--text)}
 .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.tag.green{background:var(--suppl);color:var(--supp)}.tag.gold{background:var(--goldl);color:var(--gold)}.tag.blue{background:var(--acl);color:var(--accent)}
+.tag.green{background:var(--greenl);color:var(--green)}.tag.gold{background:var(--goldl);color:var(--gold)}.tag.blue{background:var(--surface2);color:var(--purple)}
+
 .supp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.supp-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:24px;transition:all .2s}
-.supp-card:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(26,58,92,.06)}
-.supp-card-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
-.supp-card h3{font-size:16px;font-weight:600;margin-bottom:6px}
-.supp-card p{font-size:12px;color:var(--text3);margin-bottom:14px}
-.supp-online{font-size:11px;font-weight:600;color:var(--supp);display:flex;align-items:center;gap:5px}
+.supp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;transition:all .2s}
+.supp-card:hover{border-color:var(--purple);box-shadow:0 4px 20px rgba(124,58,237,0.1);transform:translateY(-2px)}
+.supp-card-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.supp-card h3{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.supp-card p{font-size:12px;color:var(--text2);margin-bottom:14px}
+.supp-online{font-size:11px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:5px}
+
 .req-list{display:flex;flex-direction:column;gap:10px}
-.req-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
-.req-card:hover{border-color:var(--accent)}
-.req-info h4{font-size:14px;font-weight:600;margin-bottom:3px}
-.req-info p{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
+.req-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
+.req-card:hover{border-color:var(--orange);box-shadow:0 4px 16px rgba(249,115,22,0.08)}
+.req-info h4{font-size:14px;font-weight:600;margin-bottom:3px;color:var(--text)}
+.req-info p{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
 .settings-g{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.settings-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:24px}
-.settings-card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.info-box{background:var(--suppl);border:1px solid #c5dcc9;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--supp)}
-.empty{padding:48px;text-align:center;color:var(--text3);font-size:13px;font-family:'DM Mono',monospace}
+.settings-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px}
+.settings-card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);color:var(--text)}
+.info-box{background:var(--orangel);border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--orange)}
+#bulkUploadPanel{background:var(--surface2);border:1px solid rgba(124,58,237,0.15);border-radius:12px;padding:20px 24px;margin-bottom:20px}
+.empty{padding:48px;text-align:center;color:var(--text3);font-size:13px;font-family:'JetBrains Mono',monospace}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 </style>
 </head>
 <body>
@@ -163,33 +261,80 @@ tbody tr:hover td{background:var(--off)}
     </div>
   </nav>
   <div class="land-hero">
+    <canvas id="heroCanvas" style="position:absolute;inset:0;z-index:0;opacity:0.8;pointer-events:none"></canvas></canvas>
+    <div class="hero-chip-wrap">
+      <div class="hero-chip-glow"></div>
+      <svg class="hero-chip-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="chipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a78bfa"/>
+            <stop offset="55%" stop-color="#38bdf8"/>
+            <stop offset="100%" stop-color="#34d399"/>
+          </linearGradient>
+          <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#e9d5ff" stop-opacity="0.55"/>
+            <stop offset="35%" stop-color="#a78bfa" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(200,200)">
+          <g opacity="0.75">
+            <rect x="-150" y="-150" width="300" height="300" rx="14" fill="none" stroke="url(#chipGrad)" stroke-width="1.6" transform="rotate(45)"/>
+            <rect x="-110" y="-110" width="220" height="220" rx="10" fill="none" stroke="url(#chipGrad)" stroke-width="1.2" stroke-dasharray="6 6" transform="rotate(45)"/>
+          </g>
+          <g stroke="url(#chipGrad)" stroke-width="2" opacity="0.95">
+            <rect x="-70" y="-70" width="140" height="140" rx="6" fill="rgba(124,58,237,0.18)"/>
+            <g id="chipPinsTop"></g>
+          </g>
+          <!-- pins -->
+          <g stroke="url(#chipGrad)" stroke-width="1.4" opacity="0.85">
+            <line x1="-50" y1="-70" x2="-50" y2="-92"/><circle cx="-50" cy="-92" r="2.5" fill="#a78bfa"/>
+            <line x1="-16" y1="-70" x2="-16" y2="-92"/><circle cx="-16" cy="-92" r="2.5" fill="#38bdf8"/>
+            <line x1="16" y1="-70" x2="16" y2="-92"/><circle cx="16" cy="-92" r="2.5" fill="#38bdf8"/>
+            <line x1="50" y1="-70" x2="50" y2="-92"/><circle cx="50" cy="-92" r="2.5" fill="#34d399"/>
+            <line x1="-50" y1="70" x2="-50" y2="92"/><circle cx="-50" cy="92" r="2.5" fill="#a78bfa"/>
+            <line x1="-16" y1="70" x2="-16" y2="92"/><circle cx="-16" cy="92" r="2.5" fill="#38bdf8"/>
+            <line x1="16" y1="70" x2="16" y2="92"/><circle cx="16" cy="92" r="2.5" fill="#38bdf8"/>
+            <line x1="50" y1="70" x2="50" y2="92"/><circle cx="50" cy="92" r="2.5" fill="#34d399"/>
+            <line x1="-70" y1="-50" x2="-92" y2="-50"/><circle cx="-92" cy="-50" r="2.5" fill="#a78bfa"/>
+            <line x1="-70" y1="-16" x2="-92" y2="-16"/><circle cx="-92" cy="-16" r="2.5" fill="#38bdf8"/>
+            <line x1="-70" y1="16" x2="-92" y2="16"/><circle cx="-92" cy="16" r="2.5" fill="#38bdf8"/>
+            <line x1="-70" y1="50" x2="-92" y2="50"/><circle cx="-92" cy="50" r="2.5" fill="#34d399"/>
+            <line x1="70" y1="-50" x2="92" y2="-50"/><circle cx="92" cy="-50" r="2.5" fill="#a78bfa"/>
+            <line x1="70" y1="-16" x2="92" y2="-16"/><circle cx="92" cy="-16" r="2.5" fill="#38bdf8"/>
+            <line x1="70" y1="16" x2="92" y2="16"/><circle cx="92" cy="16" r="2.5" fill="#38bdf8"/>
+            <line x1="70" y1="50" x2="92" y2="50"/><circle cx="92" cy="50" r="2.5" fill="#34d399"/>
+          </g>
+          <circle cx="0" cy="0" r="130" fill="url(#coreGrad)"/>
+          <g font-family="JetBrains Mono, monospace" font-size="9" fill="#c4b5fd" opacity="0.8" text-anchor="middle">
+            <text y="4">AIXIN</text>
+          </g>
+        </g>
+      </svg>
+    </div>
     <div class="hero-left">
-      <div class="hero-eye">AI-Powered Procurement Platform</div>
-      <h1>Where Buyer Agents<br>Meet <em>Supplier Agents</em></h1>
-      <p>Aixinchips connects procurement teams with verified electronic component suppliers through autonomous AI agents — negotiating prices, checking availability, and processing orders around the clock.</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary btn-lg" onclick="showAuth('customer','signup')">I am a Buyer</button>
-        <button class="btn btn-supp btn-lg" onclick="showAuth('supplier','signup')">I am a Supplier</button>
-      </div>
+      <div class="hero-eye">Electronics Procurement</div>
+      <h1>AI agents.<br><em>Better deals.</em></h1>
+      <p style="font-size:17px;color:var(--text2);line-height:1.6;margin-bottom:0;opacity:0;animation:fadeUp .6s .5s forwards">Source components fast. No calls, no waiting.</p>
     </div>
     <div class="hero-right">
-      <div class="acct-card" onclick="showAuth('customer','signup')">
-        <div class="acct-card-head"><div class="acct-icon b">B</div><h3>Buyer Account</h3></div>
-        <p>Tell your AI agent what components you need. It contacts supplier agents, compares quotes, and brings back the best options automatically.</p>
-        <div class="acct-card-foot">Get started as a buyer</div>
+      <div class="acct-card buyer" onclick="showAuth('customer','signup')">
+        <div class="acct-card-row"><div class="acct-icon b">B</div><h3>Buyer Account</h3></div>
+        <p>Describe what you need. Your agent finds the best price.</p>
+        <div class="acct-card-foot b">Start as a buyer →</div>
       </div>
-      <div class="acct-card" onclick="showAuth('supplier','signup')">
-        <div class="acct-card-head"><div class="acct-icon s">S</div><h3>Supplier Account</h3></div>
-        <p>Tell your agent what you have in stock. It responds to buyer requests 24/7 and alerts you when orders are confirmed.</p>
-        <div class="acct-card-foot" style="color:var(--supp)">Get started as a supplier</div>
+      <div class="acct-card supp" onclick="showAuth('supplier','signup')">
+        <div class="acct-card-row"><div class="acct-icon s">S</div><h3>Supplier Account</h3></div>
+        <p>List your stock. Your agent quotes buyers 24/7.</p>
+        <div class="acct-card-foot s">Start as a supplier →</div>
       </div>
     </div>
   </div>
   <div class="land-stats">
-    <div class="land-stat"><div class="land-stat-num">2m</div><div class="land-stat-label">Average response time</div></div>
-    <div class="land-stat"><div class="land-stat-num">24/7</div><div class="land-stat-label">Agent availability</div></div>
-    <div class="land-stat"><div class="land-stat-num">AI</div><div class="land-stat-label">Powered by MiniMax</div></div>
-    <div class="land-stat"><div class="land-stat-num">$0</div><div class="land-stat-label">Per transaction fee</div></div>
+    <div class="land-stat"><div class="land-stat-num">2m</div><div class="land-stat-label">Response time</div></div>
+    <div class="land-stat"><div class="land-stat-num">24/7</div><div class="land-stat-label">Always on</div></div>
+    <div class="land-stat"><div class="land-stat-num">AI</div><div class="land-stat-label">MiniMax powered</div></div>
+    <div class="land-stat"><div class="land-stat-num">$0</div><div class="land-stat-label">Transaction fee</div></div>
   </div>
 </div>
 
@@ -213,7 +358,7 @@ tbody tr:hover td{background:var(--off)}
         <div class="f-field"><label class="f-label">Password</label><input class="f-input" id="authPassword" type="password" placeholder="Password"></div>
         <button class="btn btn-primary btn-full" id="authBtn" onclick="handleAuth()">Create Account</button>
         <div class="auth-switch" id="authSwitch">Already have an account? <a onclick="toggleMode()">Sign in</a></div>
-        <div style="display:flex;align-items:center;gap:12px;margin:16px 0;"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:12px;color:var(--text3)">or try demo</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
+        <div style="display:flex;align-items:center;gap:12px;margin:20px 0"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px">OR TRY DEMO</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
         <button class="btn btn-outline btn-full" id="demoBtn" onclick="demoLogin()" style="margin-top:0">Demo: TechBuild Electronics</button>
       </div>
     </div>
@@ -267,8 +412,8 @@ tbody tr:hover td{background:var(--off)}
       <div class="page-head"><div><h1>Account Settings</h1></div></div>
       <div class="settings-g">
         <div class="settings-card"><h3>Profile</h3>
-          <div style="margin-bottom:12px;"><div class="f-label" style="margin-bottom:4px;">Company</div><div id="bsComp" style="font-size:15px;font-weight:600;"></div></div>
-          <div><div class="f-label" style="margin-bottom:4px;">Email</div><div id="bsEmail" style="font-size:13px;font-family:'DM Mono',monospace;color:var(--text2);"></div></div>
+          <div style="margin-bottom:12px"><div class="f-label" style="margin-bottom:4px">Company</div><div id="bsComp" style="font-size:15px;font-weight:600;color:var(--text)"></div></div>
+          <div><div class="f-label" style="margin-bottom:4px">Email</div><div id="bsEmail" style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text2)"></div></div>
         </div>
       </div>
     </div>
@@ -295,9 +440,9 @@ tbody tr:hover td{background:var(--off)}
   <div class="plat-body">
     <div class="plat-page active" id="s-agent">
       <div class="page-head"><div><h1>Talk to Your Agent</h1><p>Tell your agent what you have in stock</p></div></div>
-      <div class="info-box">Tell your agent what parts you stock. Example: "I have 2000 ESP32-WROOM-32E at $2.80 each, lead time 3-5 days". Your agent saves this and responds to buyer requests automatically.</div>
+      <div class="info-box">Tell your agent what parts you stock. Example: "I have 2000 ESP32-WROOM-32E at $2.80 each, lead time 3-5 days".</div>
       <div class="chat-wrap">
-        <div class="chat-head">
+        <div class="chat-head" style="background:var(--orangel)">
           <div class="av s" id="sChatAv">S</div>
           <div class="chat-head-info"><h3 id="sAgentName">Supplier Agent</h3><p>Listening for buyer requests · Auto-quoting</p></div>
           <div class="chat-status s"><div class="sdot s"></div>Active</div>
@@ -319,14 +464,13 @@ tbody tr:hover td{background:var(--off)}
           <button class="btn btn-supp btn-sm" onclick="toggleBulkPanel()">+ Bulk Upload</button>
         </div>
       </div>
-
-      <div id="bulkUploadPanel" style="display:none;background:var(--suppl);border:1px solid #c5dcc9;border-radius:10px;padding:20px 24px;margin-bottom:20px">
-        <div style="font-size:14px;font-weight:600;color:var(--supp);margin-bottom:4px">Bulk Upload Inventory</div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Upload a CSV file with your parts. Required columns: <b>part, price, stock, moq, lead</b></div>
+      <div id="bulkUploadPanel" style="display:none">
+        <div style="font-size:14px;font-weight:600;color:var(--purple);margin-bottom:4px">Bulk Upload Inventory</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Required columns: <b style="color:var(--text)">part, price, stock, moq, lead</b></div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
-          <input type="file" id="bulkCsvInput" accept=".csv" style="font-size:13px;padding:6px" />
-          <button class="btn btn-supp btn-sm" onclick="processBulkUpload()">Preview</button>
-          <button class="btn btn-outline btn-sm" onclick="downloadSampleCSV()">Download Sample CSV</button>
+          <input type="file" id="bulkCsvInput" accept=".csv" style="font-size:13px;padding:6px;color:var(--text2)" />
+          <button class="btn btn-primary btn-sm" onclick="processBulkUpload()">Preview</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadSampleCSV()">Sample CSV</button>
         </div>
         <div id="bulkUploadStatus" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:8px"></div>
         <div id="bulkPreviewTable" style="margin-top:12px;overflow-x:auto"></div>
@@ -335,14 +479,13 @@ tbody tr:hover td{background:var(--off)}
           <button class="btn btn-outline" style="margin-left:10px" onclick="cancelBulkUpload()">Cancel</button>
         </div>
       </div>
-
       <div class="stats-g">
         <div class="stat-b"><div class="stat-b-label">Total Parts</div><div class="stat-b-val blue" id="sTotP">0</div></div>
         <div class="stat-b"><div class="stat-b-label">Total Units</div><div class="stat-b-val green" id="sTotU">0</div></div>
         <div class="stat-b"><div class="stat-b-label">Requests</div><div class="stat-b-val gold" id="sTotR">0</div></div>
-        <div class="stat-b"><div class="stat-b-label">Agent Status</div><div class="stat-b-val green" style="font-size:16px;margin-top:4px;">Active</div></div>
+        <div class="stat-b"><div class="stat-b-label">Agent Status</div><div class="stat-b-val green" style="font-size:16px;margin-top:4px">Active</div></div>
       </div>
-      <div class="inv-grid" id="sInvGrid"><div class="empty" style="grid-column:1/-1;">No inventory yet. Go to My Agent and tell it what you have in stock.</div></div>
+      <div class="inv-grid" id="sInvGrid"><div class="empty" style="grid-column:1/-1">No inventory yet.</div></div>
     </div>
     <div class="plat-page" id="s-requests">
       <div class="page-head"><div><h1>Confirmed Orders</h1><p>Orders confirmed by buyers</p></div></div>
@@ -352,9 +495,9 @@ tbody tr:hover td{background:var(--off)}
       <div class="page-head"><div><h1>Account Settings</h1></div></div>
       <div class="settings-g">
         <div class="settings-card"><h3>Company Profile</h3>
-          <div style="margin-bottom:12px;"><div class="f-label" style="margin-bottom:4px;">Company</div><div id="ssComp" style="font-size:15px;font-weight:600;"></div></div>
-          <div><div class="f-label" style="margin-bottom:4px;">Email</div><div id="ssEmail" style="font-size:13px;font-family:'DM Mono',monospace;color:var(--text2);"></div></div>
-          <div style="margin-top:14px;"><div class="f-label" style="margin-bottom:4px;">Account Type</div><div style="font-size:13px;font-weight:600;color:var(--supp);">Supplier Account</div></div>
+          <div style="margin-bottom:12px"><div class="f-label" style="margin-bottom:4px">Company</div><div id="ssComp" style="font-size:15px;font-weight:600;color:var(--text)"></div></div>
+          <div><div class="f-label" style="margin-bottom:4px">Email</div><div id="ssEmail" style="font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--text2)"></div></div>
+          <div style="margin-top:14px"><div class="f-label" style="margin-bottom:4px">Account Type</div><div style="font-size:13px;font-weight:600;color:var(--orange)">Supplier Account</div></div>
         </div>
       </div>
     </div>
@@ -362,555 +505,328 @@ tbody tr:hover td{background:var(--off)}
 </div>
 
 <script>
+// === CANVAS — PCB circuit board background ===
+(function(){
+  const canvas = document.getElementById('heroCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w, h, traces=[], chips=[], pulses=[], frame=0;
+
+  const C1 = 'rgba(167,139,250,'; // purple
+  const C2 = 'rgba(56,189,248,';  // cyan
+  const C3 = 'rgba(52,211,153,';  // green
+
+  function resize(){
+    w = canvas.width = canvas.parentElement.offsetWidth;
+    h = canvas.height = canvas.parentElement.offsetHeight;
+    build();
+  }
+
+  function build(){
+    traces=[]; chips=[];
+    const cols = Math.floor(w/80), rows = Math.floor(h/80);
+
+    // build grid nodes
+    const nodes=[];
+    for(let r=0;r<=rows;r++) for(let c=0;c<=cols;c++)
+      nodes.push({x:c*80+40, y:r*80+40});
+
+    // random horizontal + vertical traces
+    for(let i=0;i<170;i++){
+      const a = nodes[Math.floor(Math.random()*nodes.length)];
+      const horiz = Math.random()>0.5;
+      const len = (Math.floor(Math.random()*3)+1)*80;
+      const b = horiz ? {x:a.x+len, y:a.y} : {x:a.x, y:a.y+len};
+      if(b.x>w||b.y>h) continue;
+      const col = Math.random()>0.6 ? C2 : Math.random()>0.5 ? C3 : C1;
+      traces.push({ax:a.x,ay:a.y,bx:b.x,by:b.y,col,alpha:Math.random()*0.35+0.16});
+    }
+
+    // IC chips (rectangles with pins)
+    for(let i=0;i<24;i++){
+      const x = Math.floor(Math.random()*(w-120))+20;
+      const y = Math.floor(Math.random()*(h-80))+20;
+      const cw = Math.random()>0.5 ? 60 : 44;
+      const ch = Math.random()>0.5 ? 36 : 28;
+      const pins = Math.floor(Math.random()*4)+3;
+      const col = Math.random()>0.5 ? C1 : C2;
+      chips.push({x,y,cw,ch,pins,col,alpha:Math.random()*0.4+0.2});
+    }
+
+    // via dots at trace intersections
+  }
+
+  function spawnPulse(){
+    if(!traces.length) return;
+    const t = traces[Math.floor(Math.random()*traces.length)];
+    pulses.push({ax:t.ax,ay:t.ay,bx:t.bx,by:t.by,col:t.col,t:0,dur:50+Math.random()*40});
+  }
+
+  function drawChip(c){
+    ctx.strokeStyle = c.col+c.alpha+')';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(c.x,c.y,c.cw,c.ch);
+    // fill
+    ctx.fillStyle = c.col+(c.alpha*0.4)+')';
+    ctx.fillRect(c.x,c.y,c.cw,c.ch);
+    // label line
+    ctx.strokeStyle = c.col+(c.alpha*0.6)+')';
+    ctx.beginPath(); ctx.moveTo(c.x+8,c.y+c.ch/2); ctx.lineTo(c.x+c.cw-8,c.y+c.ch/2); ctx.stroke();
+    // pins on left & right
+    const pinSpacing = c.ch/(c.pins+1);
+    for(let p=1;p<=c.pins;p++){
+      const py = c.y + p*pinSpacing;
+      ctx.beginPath();
+      ctx.moveTo(c.x-8,py); ctx.lineTo(c.x,py); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(c.x+c.cw,py); ctx.lineTo(c.x+c.cw+8,py); ctx.stroke();
+      // pin dots
+      ctx.beginPath(); ctx.arc(c.x-8,py,2,0,Math.PI*2);
+      ctx.fillStyle = c.col+(c.alpha*0.8)+')'; ctx.fill();
+      ctx.beginPath(); ctx.arc(c.x+c.cw+8,py,2,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function draw(){
+    frame++;
+    ctx.clearRect(0,0,w,h);
+
+    // traces
+    traces.forEach(t=>{
+      const pulse = 0.8 + 0.2*Math.sin(frame*0.02);
+      ctx.strokeStyle = t.col+(t.alpha*pulse)+')';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(t.ax,t.ay); ctx.lineTo(t.bx,t.by); ctx.stroke();
+      // via at start
+      ctx.beginPath(); ctx.arc(t.ax,t.ay,3,0,Math.PI*2);
+      ctx.fillStyle = t.col+(t.alpha*1.2)+')'; ctx.fill();
+    });
+
+    // chips
+    chips.forEach(drawChip);
+
+    // moving pulses
+    pulses = pulses.filter(p=>p.t<p.dur);
+    pulses.forEach(p=>{
+      const prog = p.t/p.dur;
+      const x = p.ax+(p.bx-p.ax)*prog;
+      const y = p.ay+(p.by-p.ay)*prog;
+      const a = Math.sin(prog*Math.PI);
+      ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fillStyle = p.col+a+')'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2);
+      ctx.fillStyle = p.col+(a*0.2)+')'; ctx.fill();
+      p.t++;
+    });
+
+    if(Math.random()<0.18) spawnPulse();
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize',()=>{resize();});
+  resize();
+  for(let i=0;i<6;i++) spawnPulse();
+  draw();
+})();
+
+// === APP LOGIC ===
 const SUPABASE_URL = 'https://qkgpjhnmnsdtwpmlrimk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_a-VHc3ic2kpkFUmSZazuXQ_A-RLHpWd';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx--KCBexJTOLoLcoCKuKHF3yS1kOFnQx7C2wgx9qBS_6UhQR9Vzi2WE7MHhkwEjJqZ/exec';
+let currentUser=null,userType='customer',authMode='signup',buyerHistory=[];
 
-let currentUser = null;
-let userType = 'customer';
-let authMode = 'signup';
-let buyerHistory = [];
-
-async function db(table, method='GET', body=null, filter='') {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Prefer': method === 'POST' ? 'return=representation' : ''
-    },
-    body: body ? JSON.stringify(body) : null
-  });
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
+async function db(table,method='GET',body=null,filter=''){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`,{method,headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Prefer':method==='POST'?'return=representation':''},body:body?JSON.stringify(body):null});
+  const text=await res.text(); return text?JSON.parse(text):[];
 }
-
-async function claude(systemPrompt, messages) {
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({
-      systemPrompt,
-      messages: Array.isArray(messages) ? messages : [{ role: 'user', content: messages }]
-    })
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data.reply;
+async function claude(systemPrompt,messages){
+  const res=await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({systemPrompt,messages:Array.isArray(messages)?messages:[{role:'user',content:messages}]})});
+  const data=await res.json(); if(data.error)throw new Error(data.error); return data.reply;
 }
-
-function showLanding() {
-  ['auth','buyer-shell','supplier-shell'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.style.display = 'none'; el.style.flexDirection = ''; }
-  });
-  document.getElementById('landing').style.cssText = 'display:flex;flex-direction:column;';
+function showLanding(){
+  ['auth','buyer-shell','supplier-shell'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.style.flexDirection='';}});
+  document.getElementById('landing').style.cssText='display:flex;flex-direction:column;';
 }
-
-function showAuth(type, mode) {
-  userType = type; authMode = mode;
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('auth').style.display = 'block';
-  const isSupp = type === 'supplier';
-  document.getElementById('authPanel').className = 'auth-left' + (isSupp ? ' supp-side' : '');
-  document.getElementById('authLeftTitle').textContent = isSupp ? 'Sell Smarter.' : 'Procurement,\nAutomated.';
-  document.getElementById('authLeftSub').textContent = isSupp ? 'Tell your agent what you have. It handles buyer inquiries 24/7.' : 'Your agent negotiates with suppliers while you focus on your business.';
-  const isLogin = mode === 'login';
-  document.getElementById('authTitle').textContent = isLogin ? 'Welcome back' : 'Create your account';
-  document.getElementById('authSub').textContent = isLogin ? 'Sign in to continue' : (isSupp ? 'Join as a supplier' : 'Join as a buyer');
-  document.getElementById('signupOnly').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('authBtn').textContent = isLogin ? 'Sign In' : 'Create Account';
-  document.getElementById('authBtn').className = 'btn btn-full ' + (isSupp ? 'btn-supp' : 'btn-primary');
-  document.getElementById('authSwitch').innerHTML = isLogin ? 'No account? <a onclick="toggleMode()">Sign up</a>' : 'Already have an account? <a onclick="toggleMode()">Sign in</a>';
-  document.getElementById('demoBtn').textContent = isSupp ? 'Demo: Nexwah Components' : 'Demo: TechBuild Electronics';
-  document.getElementById('authErr').style.display = 'none';
+function showAuth(type,mode){
+  userType=type;authMode=mode;
+  document.getElementById('landing').style.display='none';
+  document.getElementById('auth').style.display='block';
+  const isSupp=type==='supplier';
+  document.getElementById('authPanel').className='auth-left'+(isSupp?' supp-side':'');
+  document.getElementById('authLeftTitle').textContent=isSupp?'Sell Smarter.':'Procurement,\nAutomated.';
+  document.getElementById('authLeftSub').textContent=isSupp?'Tell your agent what you have. It handles buyer inquiries 24/7.':'Your agent negotiates with suppliers while you focus on your business.';
+  const isLogin=mode==='login';
+  document.getElementById('authTitle').textContent=isLogin?'Welcome back':'Create your account';
+  document.getElementById('authSub').textContent=isLogin?'Sign in to continue':(isSupp?'Join as a supplier':'Join as a buyer');
+  document.getElementById('signupOnly').style.display=isLogin?'none':'block';
+  document.getElementById('authBtn').textContent=isLogin?'Sign In':'Create Account';
+  document.getElementById('authBtn').className='btn btn-full '+(isSupp?'btn-supp':'btn-primary');
+  document.getElementById('authSwitch').innerHTML=isLogin?'No account? <a onclick="toggleMode()">Sign up</a>':'Already have an account? <a onclick="toggleMode()">Sign in</a>';
+  document.getElementById('demoBtn').textContent=isSupp?'Demo: Nexwah Components':'Demo: TechBuild Electronics';
+  document.getElementById('authErr').style.display='none';
 }
-
-function toggleMode() { showAuth(userType, authMode === 'login' ? 'signup' : 'login'); }
-
-async function demoLogin() {
-  const email = userType === 'customer' ? 'buyer@techbuild.com' : 'supplier@nexwah.com';
-  await doLogin(email, 'demo123', userType);
-}
-
-async function handleAuth() {
-  const email = document.getElementById('authEmail').value.trim();
-  const pw = document.getElementById('authPassword').value;
-  const company = document.getElementById('authCompany') ? document.getElementById('authCompany').value.trim() : '';
-  if (!email) { showErr('Please enter your email.'); return; }
-  if (authMode === 'login') {
-    await doLogin(email, pw, userType);
-  } else {
-    if (!company) { showErr('Please enter your company name.'); return; }
-    try {
-      const existing = await db('users', 'GET', null, `?email=eq.${encodeURIComponent(email)}`);
-      if (existing.length > 0) { showErr('Email already registered.'); return; }
-      const users = await db('users', 'POST', { type: userType, company, email, password: pw });
-      loginUser(users[0]);
-    } catch(e) { showErr('Signup failed: ' + e.message); }
+function toggleMode(){showAuth(userType,authMode==='login'?'signup':'login');}
+async function demoLogin(){await doLogin(userType==='customer'?'buyer@techbuild.com':'supplier@nexwah.com','demo123',userType);}
+async function handleAuth(){
+  const email=document.getElementById('authEmail').value.trim();
+  const pw=document.getElementById('authPassword').value;
+  const company=document.getElementById('authCompany')?document.getElementById('authCompany').value.trim():'';
+  if(!email){showErr('Please enter your email.');return;}
+  if(authMode==='login'){await doLogin(email,pw,userType);}
+  else{
+    if(!company){showErr('Please enter your company name.');return;}
+    try{const existing=await db('users','GET',null,`?email=eq.${encodeURIComponent(email)}`);if(existing.length>0){showErr('Email already registered.');return;}const users=await db('users','POST',{type:userType,company,email,password:pw});loginUser(users[0]);}
+    catch(e){showErr('Signup failed: '+e.message);}
   }
 }
-
-async function doLogin(email, pw, type) {
-  try {
-    const users = await db('users', 'GET', null, `?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(pw)}&type=eq.${type}`);
-    if (users.length > 0) loginUser(users[0]);
-    else showErr('Invalid email or password.');
-  } catch(e) { showErr('Login failed: ' + e.message); }
+async function doLogin(email,pw,type){
+  try{const users=await db('users','GET',null,`?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(pw)}&type=eq.${type}`);if(users.length>0)loginUser(users[0]);else showErr('Invalid email or password.');}
+  catch(e){showErr('Login failed: '+e.message);}
 }
-
-function showErr(msg) { const el = document.getElementById('authErr'); el.textContent = msg; el.style.display = 'block'; }
-
-function loginUser(user) {
-  currentUser = user;
-  buyerHistory = [];
-  document.getElementById('auth').style.display = 'none';
-  if (user.type === 'customer') {
-    const s = document.getElementById('buyer-shell'); s.style.cssText = 'display:flex;flex-direction:column;';
-    document.getElementById('bAv').textContent = user.company[0];
-    document.getElementById('bName').textContent = user.company;
-    document.getElementById('bChatAv').textContent = user.company[0];
-    document.getElementById('bAgentName').textContent = user.company + ' Procurement Agent';
-    document.getElementById('bWelcome').textContent = 'Good day. I am your procurement agent for ' + user.company + '. Tell me what electronic components you need and I will contact supplier agents to find the best pricing.';
-    document.getElementById('bsComp').textContent = user.company;
-    document.getElementById('bsEmail').textContent = user.email;
+function showErr(msg){const el=document.getElementById('authErr');el.textContent=msg;el.style.display='block';}
+function loginUser(user){
+  currentUser=user;buyerHistory=[];
+  document.getElementById('auth').style.display='none';
+  if(user.type==='customer'){
+    const s=document.getElementById('buyer-shell');s.style.cssText='display:flex;flex-direction:column;';
+    document.getElementById('bAv').textContent=user.company[0];
+    document.getElementById('bName').textContent=user.company;
+    document.getElementById('bChatAv').textContent=user.company[0];
+    document.getElementById('bAgentName').textContent=user.company+' Procurement Agent';
+    document.getElementById('bWelcome').textContent='Good day. I am your procurement agent for '+user.company+'. Tell me what electronic components you need and I will contact supplier agents to find the best pricing.';
+    document.getElementById('bsComp').textContent=user.company;
+    document.getElementById('bsEmail').textContent=user.email;
     loadSuppliers();
-  } else {
-    const s = document.getElementById('supplier-shell'); s.style.cssText = 'display:flex;flex-direction:column;';
-    document.getElementById('sAv').textContent = user.company[0];
-    document.getElementById('sName').textContent = user.company;
-    document.getElementById('sChatAv').textContent = user.company[0];
-    document.getElementById('sAgentName').textContent = user.company + ' Agent';
-    document.getElementById('ssComp').textContent = user.company;
-    document.getElementById('ssEmail').textContent = user.email;
+  }else{
+    const s=document.getElementById('supplier-shell');s.style.cssText='display:flex;flex-direction:column;';
+    document.getElementById('sAv').textContent=user.company[0];
+    document.getElementById('sName').textContent=user.company;
+    document.getElementById('sChatAv').textContent=user.company[0];
+    document.getElementById('sAgentName').textContent=user.company+' Agent';
+    document.getElementById('ssComp').textContent=user.company;
+    document.getElementById('ssEmail').textContent=user.email;
     loadSuppInv();
   }
 }
-
-function logout() {
-  currentUser = null;
-  ['buyer-shell','supplier-shell'].forEach(id => { const el = document.getElementById(id); el.style.display = 'none'; el.style.flexDirection = ''; });
-  showLanding();
+function logout(){currentUser=null;['buyer-shell','supplier-shell'].forEach(id=>{const el=document.getElementById(id);el.style.display='none';el.style.flexDirection='';});showLanding();}
+function bPage(p){
+  document.querySelectorAll('#buyer-shell .plat-page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('#buyer-shell .plat-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('b-'+p).classList.add('active');
+  const tab=document.getElementById('bt-'+p);if(tab)tab.classList.add('active');
+  if(p==='orders')loadOrders();if(p==='suppliers')loadSuppliers();
 }
-
-function bPage(p) {
-  document.querySelectorAll('#buyer-shell .plat-page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('#buyer-shell .plat-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('b-' + p).classList.add('active');
-  const tab = document.getElementById('bt-' + p); if (tab) tab.classList.add('active');
-  if (p === 'orders') loadOrders();
-  if (p === 'suppliers') loadSuppliers();
-}
-
-async function buyerSend() {
-  const input = document.getElementById('bInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  addMsg('bMsgs', msg, 'user', currentUser.company);
-  document.getElementById('bSendBtn').disabled = true;
-  const tid = addThinking('bMsgs', 'Contacting supplier agents');
-
-  try {
-    const suppliers = await db('users', 'GET', null, '?type=eq.supplier');
-    const invParts = await Promise.all(suppliers.map(async s => {
-      const inv = await db('inventory', 'GET', null, `?user_id=eq.${s.id}&order=id.asc`);
-      if (!inv.length) return null;
-      return `Supplier: ${s.company}\n${inv.map(i => `  - ${i.part}: $${i.price}/unit, ${i.stock} units, MOQ ${i.moq}, lead ${i.lead}${i.stock === 0 ? ' (OUT OF STOCK)' : ''}`).join('\n')}`;
-    }));
-    const suppContext = invParts.filter(Boolean).join('\n\n');
-
-    const systemPrompt = `You are a professional AI procurement agent on the Aixinchips platform.
-
-Supplier network:
-${suppContext || 'No suppliers active yet.'}
-
-When buyer asks for components:
-1. Check which suppliers have the item in stock
-2. Present clear quotes: supplier name, unit price, total cost, stock, lead time
-3. Recommend best option
-4. Ask buyer to reply "confirm" to place order
-
-If buyer says "confirm", generate order reference ORD-XXXXXX and confirm the order.
-Be professional and concise.`;
-
-    buyerHistory.push({ role: 'user', content: msg });
-    const reply = await claude(systemPrompt, buyerHistory.slice(-10));
-    buyerHistory.push({ role: 'assistant', content: reply });
-
-    removeThing(tid);
-    addMsg('bMsgs', reply, 'agent', 'Agent');
-
-    if (msg.toLowerCase().match(/need|want|order|require/)) {
-      await db('orders', 'POST', { user_id: currentUser.id, message: msg, reply, status: 'Quote Received' });
+async function buyerSend(){
+  const input=document.getElementById('bInput');const msg=input.value.trim();if(!msg)return;
+  input.value='';addMsg('bMsgs',msg,'user',currentUser.company);
+  document.getElementById('bSendBtn').disabled=true;
+  const tid=addThinking('bMsgs','Contacting supplier agents');
+  try{
+    const suppliers=await db('users','GET',null,'?type=eq.supplier');
+    const invParts=await Promise.all(suppliers.map(async s=>{const inv=await db('inventory','GET',null,`?user_id=eq.${s.id}&order=id.asc`);if(!inv.length)return null;return `Supplier: ${s.company}\n${inv.map(i=>`  - ${i.part}: $${i.price}/unit, ${i.stock} units, MOQ ${i.moq}, lead ${i.lead}${i.stock===0?' (OUT OF STOCK)':''}`).join('\n')}`;}));
+    const suppContext=invParts.filter(Boolean).join('\n\n');
+    const systemPrompt=`You are a professional AI procurement agent on the Aixinchips platform.\n\nSupplier network:\n${suppContext||'No suppliers active yet.'}\n\nWhen buyer asks for components:\n1. Check which suppliers have the item in stock\n2. Present clear quotes: supplier name, unit price, total cost, stock, lead time\n3. Recommend best option\n4. Ask buyer to reply "confirm" to place order\n\nIf buyer says "confirm", generate order reference ORD-XXXXXX and confirm the order.\nBe professional and concise.`;
+    buyerHistory.push({role:'user',content:msg});
+    const reply=await claude(systemPrompt,buyerHistory.slice(-10));
+    buyerHistory.push({role:'assistant',content:reply});
+    removeThing(tid);addMsg('bMsgs',reply,'agent','Agent');
+    if(msg.toLowerCase().match(/need|want|order|require/)){await db('orders','POST',{user_id:currentUser.id,message:msg,reply,status:'Quote Received'});}
+    if(msg.toLowerCase().includes('confirm')){
+      const orderId='ORD-'+Date.now().toString().slice(-6);
+      const agentMsgs=buyerHistory.filter(h=>h.role==='assistant');
+      const lastAgentMsg=agentMsgs[agentMsgs.length-1]?.content||'';
+      const prevAgentMsg=agentMsgs[agentMsgs.length-2]?.content||'';
+      const combinedMsgs=lastAgentMsg+' '+prevAgentMsg;
+      const partMatch=combinedMsgs.match(/ESP32[\w-]*|STM32[\w-]*|ATMEGA[\w-]*|Raspberry Pi[\w\s]*\dB?|DHT\d+|nRF[\w+]+|RP2040|BMP280/i);
+      const part=partMatch?partMatch[0].trim():'Component';
+      const qtyMatch=msg.match(/(\d+)\s+(?:units?|pcs?|pieces?)/i)||msg.match(/(\d+)\s+\w/i);
+      const qty=qtyMatch?parseInt(qtyMatch[1]):0;
+      const totalMatch=combinedMsgs.match(/Total[^:]*:\s*\*?\*?\$?([\d,]+(?:\.\d+)?)/i);
+      const total=totalMatch?'$'+totalMatch[1]:'TBD';
+      let matchingSupplier=null;
+      for(const s of suppliers){if(lastAgentMsg.toLowerCase().includes(s.company.toLowerCase())){matchingSupplier=s;break;}}
+      if(!matchingSupplier)for(const s of suppliers){if(prevAgentMsg.toLowerCase().includes(s.company.toLowerCase())){matchingSupplier=s;break;}}
+      if(!matchingSupplier)matchingSupplier=suppliers[0];
+      if(matchingSupplier){await db('requests','POST',{supplier_id:matchingSupplier.id,customer:currentUser.company,buyer_email:currentUser.email,part,qty,status:'confirmed',order_ref:orderId,total,buyer_company:currentUser.company});}
     }
-
-    if (msg.toLowerCase().includes('confirm')) {
-      const orderId = 'ORD-' + Date.now().toString().slice(-6);
-      const agentMsgs = buyerHistory.filter(h => h.role === 'assistant');
-      const lastAgentMsg = agentMsgs[agentMsgs.length - 1]?.content || '';
-      const prevAgentMsg = agentMsgs[agentMsgs.length - 2]?.content || '';
-      const combinedMsgs = lastAgentMsg + ' ' + prevAgentMsg;
-
-      const partMatch = combinedMsgs.match(/ESP32[\w-]*|STM32[\w-]*|ATMEGA[\w-]*|Raspberry Pi[\w\s]*\dB?|DHT\d+|nRF[\w+]+|RP2040|BMP280/i);
-      const part = partMatch ? partMatch[0].trim() : 'Component';
-
-      const qtyMatch = msg.match(/(\d+)\s+(?:units?|pcs?|pieces?)/i) || msg.match(/(\d+)\s+\w/i);
-      const qty = qtyMatch ? parseInt(qtyMatch[1]) : 0;
-
-      const totalMatch = combinedMsgs.match(/Total[^:]*:\s*\*?\*?\$?([\d,]+(?:\.\d+)?)/i);
-      const total = totalMatch ? '$' + totalMatch[1] : 'TBD';
-
-      let matchingSupplier = null;
-      for (const s of suppliers) {
-        if (lastAgentMsg.toLowerCase().includes(s.company.toLowerCase())) {
-          matchingSupplier = s; break;
-        }
-      }
-      if (!matchingSupplier) {
-        for (const s of suppliers) {
-          if (prevAgentMsg.toLowerCase().includes(s.company.toLowerCase())) {
-            matchingSupplier = s; break;
-          }
-        }
-      }
-      if (!matchingSupplier) matchingSupplier = suppliers[0];
-
-      if (matchingSupplier) {
-        await db('requests', 'POST', {
-          supplier_id: matchingSupplier.id,
-          customer: currentUser.company,
-          buyer_email: currentUser.email,
-          part, qty, status: 'confirmed',
-          order_ref: orderId,
-          total,
-          buyer_company: currentUser.company
-        });
-      }
-    }
-  } catch(e) {
-    removeThing(tid);
-    addMsg('bMsgs', 'Unable to reach agent: ' + e.message, 'agent', 'Agent');
-  }
-  document.getElementById('bSendBtn').disabled = false;
+  }catch(e){removeThing(tid);addMsg('bMsgs','Unable to reach agent: '+e.message,'agent','Agent');}
+  document.getElementById('bSendBtn').disabled=false;
 }
-
-async function loadOrders() {
-  try {
-    const orders = await db('orders', 'GET', null, `?user_id=eq.${currentUser.id}&order=created_at.desc`);
-    const body = document.getElementById('bOrdersBody');
-    if (!orders.length) { body.innerHTML = '<div class="empty">No orders yet.</div>'; return; }
-    body.innerHTML = '<table><thead><tr><th>Request</th><th>Time</th><th>Status</th></tr></thead><tbody>' +
-      orders.map(o => `<tr><td style="font-weight:500;max-width:400px;">${o.message}</td><td style="font-family:'DM Mono',monospace;color:var(--text3);font-size:12px;">${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('') +
-      '</tbody></table>';
-  } catch(e) {}
+async function loadOrders(){
+  try{const orders=await db('orders','GET',null,`?user_id=eq.${currentUser.id}&order=created_at.desc`);const body=document.getElementById('bOrdersBody');if(!orders.length){body.innerHTML='<div class="empty">No orders yet.</div>';return;}body.innerHTML='<table><thead><tr><th>Request</th><th>Time</th><th>Status</th></tr></thead><tbody>'+orders.map(o=>`<tr><td style="font-weight:500;max-width:400px;color:var(--text)">${o.message}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:12px">${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('')+'</tbody></table>';}catch(e){}
 }
-
-async function loadSuppliers() {
-  try {
-    const suppliers = await db('users', 'GET', null, '?type=eq.supplier');
-    const el = document.getElementById('bSuppCards');
-    if (!suppliers.length) { el.innerHTML = '<div class="empty">No suppliers yet.</div>'; return; }
-    const cards = await Promise.all(suppliers.map(async s => {
-      const inv = await db('inventory', 'GET', null, `?user_id=eq.${s.id}&order=id.asc`);
-      const total = inv.reduce((sum, i) => sum + i.stock, 0);
-      return `<div class="supp-card"><div class="supp-card-tag">Verified Supplier</div><h3>${s.company}</h3><p>${inv.length} parts · ${total.toLocaleString()} units total</p><div style="font-size:12px;color:var(--text3);margin-bottom:12px;">${inv.slice(0,3).map(i=>i.part).join(', ')}</div><div class="supp-online"><div class="sdot s" style="width:5px;height:5px;"></div>Agent Online</div></div>`;
-    }));
-    el.innerHTML = cards.join('');
-  } catch(e) {}
+async function loadSuppliers(){
+  try{const suppliers=await db('users','GET',null,'?type=eq.supplier');const el=document.getElementById('bSuppCards');if(!suppliers.length){el.innerHTML='<div class="empty">No suppliers yet.</div>';return;}const cards=await Promise.all(suppliers.map(async s=>{const inv=await db('inventory','GET',null,`?user_id=eq.${s.id}&order=id.asc`);const total=inv.reduce((sum,i)=>sum+i.stock,0);return `<div class="supp-card"><div class="supp-card-tag">Verified Supplier</div><h3>${s.company}</h3><p>${inv.length} parts · ${total.toLocaleString()} units total</p><div style="font-size:12px;color:var(--text3);margin-bottom:12px">${inv.slice(0,3).map(i=>i.part).join(', ')}</div><div class="supp-online"><div class="sdot s" style="width:5px;height:5px;background:var(--green)"></div>Agent Online</div></div>`;}));el.innerHTML=cards.join('');}catch(e){}
 }
-
-function sPage(p) {
-  document.querySelectorAll('#supplier-shell .plat-page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('#supplier-shell .plat-tab').forEach(el => { el.classList.remove('active','s'); });
-  document.getElementById('s-' + p).classList.add('active');
-  const tab = document.getElementById('st-' + p); if (tab) tab.classList.add('active', 's');
-  if (p === 'inventory') loadSuppInv();
-  if (p === 'requests') loadRequests();
+function sPage(p){
+  document.querySelectorAll('#supplier-shell .plat-page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('#supplier-shell .plat-tab').forEach(el=>{el.classList.remove('active','s');});
+  document.getElementById('s-'+p).classList.add('active');
+  const tab=document.getElementById('st-'+p);if(tab)tab.classList.add('active','s');
+  if(p==='inventory')loadSuppInv();if(p==='requests')loadRequests();
 }
-
-async function suppSend() {
-  const input = document.getElementById('sInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  addMsg('sMsgs', msg, 'user', currentUser.company);
-  const tid = addThinking('sMsgs', 'Processing');
-
-  try {
-    const inv = await db('inventory', 'GET', null, `?user_id=eq.${currentUser.id}&order=id.asc`);
-
-    const systemPrompt = `You are a supplier agent on the Aixinchips procurement platform.
-Current inventory: ${JSON.stringify(inv)}
-
-When supplier tells you about stock, respond with an inventory update block AND a friendly confirmation.
-
-Use this exact format:
-<inventory_update>
-{"action":"add_or_update","part":"PART_NAME","price":0.00,"stock":0,"moq":0,"lead":"X-Y days"}
-</inventory_update>
-
-For out of stock: <inventory_update>{"action":"out_of_stock","part":"PART_NAME"}</inventory_update>
-For price update: <inventory_update>{"action":"price_update","part":"PART_NAME","price":0.00}</inventory_update>
-For show: <inventory_update>{"action":"show"}</inventory_update>
-
-Be professional and confirm what you understood.`;
-
-    const reply = await claude(systemPrompt, msg);
-    const updateMatch = reply.match(/<inventory_update>([\s\S]*?)<\/inventory_update>/);
-    let cleanReply = reply.replace(/<inventory_update>[\s\S]*?<\/inventory_update>/g, '').trim();
-
-    if (updateMatch) {
-      try {
-        const update = JSON.parse(updateMatch[1].trim());
-        if (update.action === 'add_or_update') {
-          const existing = await db('inventory', 'GET', null, `?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(update.part)}`);
-          if (existing.length > 0) {
-            await db('inventory', 'PATCH', { price: update.price, stock: update.stock, moq: update.moq || 10, lead: update.lead || '3-5 days' }, `?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(update.part)}`);
-          } else {
-            await db('inventory', 'POST', { user_id: currentUser.id, part: update.part, price: update.price, stock: update.stock, moq: update.moq || 10, lead: update.lead || '3-5 days' });
-          }
-        } else if (update.action === 'out_of_stock') {
-          await db('inventory', 'PATCH', { stock: 0 }, `?user_id=eq.${currentUser.id}&part=ilike.*${encodeURIComponent(update.part)}*`);
-        } else if (update.action === 'price_update') {
-          await db('inventory', 'PATCH', { price: update.price }, `?user_id=eq.${currentUser.id}&part=ilike.*${encodeURIComponent(update.part)}*`);
-        } else if (update.action === 'show') {
-          const current = await db('inventory', 'GET', null, `?user_id=eq.${currentUser.id}&order=id.asc`);
-          cleanReply = current.length === 0 ? 'Your inventory is empty.' : 'Your inventory:\n\n' + current.map(i => `• ${i.part}: $${i.price}/unit, ${i.stock.toLocaleString()} units, lead ${i.lead}`).join('\n');
-        }
+async function suppSend(){
+  const input=document.getElementById('sInput');const msg=input.value.trim();if(!msg)return;
+  input.value='';addMsg('sMsgs',msg,'user',currentUser.company);
+  const tid=addThinking('sMsgs','Processing');
+  try{
+    const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);
+    const systemPrompt=`You are a supplier agent on the Aixinchips procurement platform.\nCurrent inventory: ${JSON.stringify(inv)}\n\nWhen supplier tells you about stock, respond with an inventory update block AND a friendly confirmation.\n\nUse this exact format:\n<inventory_update>\n{"action":"add_or_update","part":"PART_NAME","price":0.00,"stock":0,"moq":0,"lead":"X-Y days"}\n</inventory_update>\n\nFor out of stock: <inventory_update>{"action":"out_of_stock","part":"PART_NAME"}</inventory_update>\nFor price update: <inventory_update>{"action":"price_update","part":"PART_NAME","price":0.00}</inventory_update>\nFor show: <inventory_update>{"action":"show"}</inventory_update>\n\nBe professional and confirm what you understood.`;
+    const reply=await claude(systemPrompt,msg);
+    const updateMatch=reply.match(/<inventory_update>([\s\S]*?)<\/inventory_update>/);
+    let cleanReply=reply.replace(/<inventory_update>[\s\S]*?<\/inventory_update>/g,'').trim();
+    if(updateMatch){
+      try{
+        const update=JSON.parse(updateMatch[1].trim());
+        if(update.action==='add_or_update'){const existing=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(update.part)}`);if(existing.length>0){await db('inventory','PATCH',{price:update.price,stock:update.stock,moq:update.moq||10,lead:update.lead||'3-5 days'},`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(update.part)}`);}else{await db('inventory','POST',{user_id:currentUser.id,part:update.part,price:update.price,stock:update.stock,moq:update.moq||10,lead:update.lead||'3-5 days'});}}
+        else if(update.action==='out_of_stock'){await db('inventory','PATCH',{stock:0},`?user_id=eq.${currentUser.id}&part=ilike.*${encodeURIComponent(update.part)}*`);}
+        else if(update.action==='price_update'){await db('inventory','PATCH',{price:update.price},`?user_id=eq.${currentUser.id}&part=ilike.*${encodeURIComponent(update.part)}*`);}
+        else if(update.action==='show'){const current=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);cleanReply=current.length===0?'Your inventory is empty.':'Your inventory:\n\n'+current.map(i=>`• ${i.part}: $${i.price}/unit, ${i.stock.toLocaleString()} units, lead ${i.lead}`).join('\n');}
         loadSuppInv();
-      } catch(e) { console.log('Inventory parse error:', e); }
+      }catch(e){console.log('Inventory parse error:',e);}
     }
-
-    removeThing(tid);
-    addMsg('sMsgs', cleanReply || reply, 'agent', 'Agent');
-  } catch(e) {
-    removeThing(tid);
-    addMsg('sMsgs', 'Unable to reach agent: ' + e.message, 'agent', 'Agent');
-  }
+    removeThing(tid);addMsg('sMsgs',cleanReply||reply,'agent','Agent');
+  }catch(e){removeThing(tid);addMsg('sMsgs','Unable to reach agent: '+e.message,'agent','Agent');}
 }
-
-async function loadSuppInv() {
-  try {
-    const inv = await db('inventory', 'GET', null, `?user_id=eq.${currentUser.id}&order=id.asc`);
-    document.getElementById('sTotP').textContent = inv.length;
-    document.getElementById('sTotU').textContent = inv.reduce((s,i)=>s+i.stock,0).toLocaleString();
-    const grid = document.getElementById('sInvGrid');
-    if (!inv.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">No inventory yet. Go to My Agent and tell it what you have in stock.</div>'; return; }
-    grid.innerHTML = inv.map(i => `<div class="inv-card"><div class="inv-part">${i.part}</div><div class="inv-price">$${i.price}</div><div class="inv-detail">${i.stock.toLocaleString()} units · MOQ ${i.moq}</div><div class="inv-detail">Lead: ${i.lead}</div><div class="inv-avail ${i.stock===0?'low':i.stock<50?'low':''}">${i.stock===0?'Out of Stock':i.stock<50?'Low Stock':'In Stock'}</div></div>`).join('');
-  } catch(e) {}
+async function loadSuppInv(){
+  try{const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);document.getElementById('sTotP').textContent=inv.length;document.getElementById('sTotU').textContent=inv.reduce((s,i)=>s+i.stock,0).toLocaleString();const grid=document.getElementById('sInvGrid');if(!inv.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">No inventory yet. Go to My Agent and tell it what you have in stock.</div>';return;}grid.innerHTML=inv.map(i=>`<div class="inv-card"><div class="inv-part">${i.part}</div><div class="inv-price">$${i.price}</div><div class="inv-detail">MOQ ${i.moq} · Lead ${i.lead}</div><div class="inv-avail${i.stock===0?' low':''}">${i.stock===0?'⚠ Out of stock':'● '+i.stock.toLocaleString()+' units'}</div></div>`).join('');}catch(e){}
 }
-
-async function loadRequests() {
-  try {
-    const reqs = await db('requests', 'GET', null, `?supplier_id=eq.${currentUser.id}&order=created_at.desc`);
-    document.getElementById('sTotR').textContent = reqs.length;
-    const el = document.getElementById('sReqList');
-    if (!reqs.length) { el.innerHTML = '<div class="empty">No confirmed orders yet.</div>'; return; }
-    el.innerHTML = reqs.map(r => `
-      <div class="req-card" onclick="showOrderDetail(${JSON.stringify(r).replace(/"/g,'&quot;')})">
-        <div class="req-info">
-          <h4>${r.buyer_email || r.buyer_company || r.customer} — ${r.part}${r.qty ? ' × ' + r.qty : ''}</h4>
-          <p>${r.order_ref || 'Order'} · ${r.total || ''} · ${new Date(r.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</p>
-        </div>
-        <span class="tag green">${r.status}</span>
-      </div>`).join('');
-  } catch(e) { console.log('loadRequests error:', e); }
+async function loadRequests(){
+  try{const reqs=await db('requests','GET',null,`?supplier_id=eq.${currentUser.id}&order=id.desc`);document.getElementById('sTotR').textContent=reqs.length;const el=document.getElementById('sReqList');if(!reqs.length){el.innerHTML='<div class="empty">No confirmed orders yet.</div>';return;}el.innerHTML=reqs.map(r=>`<div class="req-card"><div class="req-info"><h4>${r.part} × ${r.qty}</h4><p>${r.order_ref} · ${r.buyer_company}</p></div><div style="display:flex;align-items:center;gap:12px"><div style="font-size:13px;font-weight:600;color:var(--green)">${r.total}</div><span class="tag green">${r.status}</span></div></div>`).join('');}catch(e){}
 }
+function addMsg(containerId,text,type,who){const el=document.getElementById(containerId);const div=document.createElement('div');div.className='msg-row'+(type==='user'?' r':'');div.innerHTML=`<div class="msg-who">${who}</div><div class="msg-bub ${type}">${text.replace(/\n/g,'<br>')}</div>`;el.appendChild(div);el.scrollTop=el.scrollHeight;}
+function addThinking(containerId,text){const el=document.getElementById(containerId);const id='think-'+Date.now();const div=document.createElement('div');div.className='msg-row';div.id=id;div.innerHTML=`<div class="msg-who">Agent</div><div class="msg-bub think"><div class="dots"><span></span><span></span><span></span></div>${text}...</div>`;el.appendChild(div);el.scrollTop=el.scrollHeight;return id;}
+function removeThing(id){const el=document.getElementById(id);if(el)el.remove();}
+document.addEventListener('DOMContentLoaded',()=>{['bInput','sInput'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();id==='bInput'?buyerSend():suppSend();}});});});
 
-function showOrderDetail(order) {
-  alert(`Order Reference: ${order.order_ref || 'N/A'}\nBuyer: ${order.buyer_email || order.buyer_company || order.customer}\nPart: ${order.part}\nQuantity: ${order.qty || 'N/A'}\nTotal: ${order.total || 'N/A'}\nStatus: ${order.status}\nDate: ${new Date(order.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}`);
+let _bulkParsedRows=[];
+function toggleBulkPanel(){const p=document.getElementById('bulkUploadPanel');p.style.display=p.style.display==='none'?'block':'none';}
+function downloadSampleCSV(){const csv='part,price,stock,moq,lead\nESP32-WROOM-32E,2.80,500,10,3-5 days\nSTM32F103C8T6,2.90,200,50,5-7 days';const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='sample_inventory.csv';a.click();}
+function processBulkUpload(){
+  const file=document.getElementById('bulkCsvInput').files[0];const statusEl=document.getElementById('bulkUploadStatus');const previewEl=document.getElementById('bulkPreviewTable');const confirmRow=document.getElementById('bulkConfirmRow');
+  if(!file){statusEl.style.display='block';statusEl.style.background='var(--dangerl)';statusEl.style.color='var(--danger)';statusEl.textContent='Please select a CSV file.';return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const lines=e.target.result.trim().split('\n').filter(l=>l.trim());
+    if(lines.length<2){statusEl.style.display='block';statusEl.style.background='var(--dangerl)';statusEl.style.color='var(--danger)';statusEl.textContent='CSV is empty or has no data rows.';return;}
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());const required=['part','price','stock'];const missing=required.filter(r=>!headers.includes(r));
+    if(missing.length){statusEl.style.display='block';statusEl.style.background='var(--dangerl)';statusEl.style.color='var(--danger)';statusEl.textContent='Missing required columns: '+missing.join(', ');return;}
+    _bulkParsedRows=lines.slice(1).map(line=>{const vals=line.split(',');const row={};headers.forEach((h,i)=>row[h]=(vals[i]||'').trim());return row;}).filter(r=>r.part&&r.price&&r.stock);
+    if(!_bulkParsedRows.length){statusEl.style.display='block';statusEl.style.background='var(--dangerl)';statusEl.style.color='var(--danger)';statusEl.textContent='No valid rows found in CSV.';return;}
+    previewEl.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg)">Part</th><th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg)">Price</th><th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg)">Stock</th><th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg)">MOQ</th><th style="padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg)">Lead Time</th></tr></thead><tbody>'+_bulkParsedRows.map(r=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple)">${r.part}</td><td style="padding:8px 12px">$${r.price}</td><td style="padding:8px 12px">${r.stock}</td><td style="padding:8px 12px;color:var(--text2)">${r.moq||1}</td><td style="padding:8px 12px;color:var(--text2)">${r.lead||'—'}</td></tr>`).join('')+'</tbody></table>';
+    statusEl.style.display='block';statusEl.style.background='var(--greenl)';statusEl.style.color='var(--green)';statusEl.textContent=`${_bulkParsedRows.length} parts ready to upload. Review below and click Confirm.`;confirmRow.style.display='block';
+  };reader.readAsText(file);
 }
-
-function addMsg(containerId, text, role, who) {
-  const el = document.getElementById(containerId);
-  const cls = role === 'user' ? 'r' : '';
-  el.innerHTML += `<div class="msg-row ${cls}"><div class="msg-who">${who}</div><div class="msg-bub ${role==='user'?'user':'agent'}">${text.replace(/\n/g,'<br>')}</div></div>`;
-  el.scrollTop = el.scrollHeight;
+async function confirmBulkUpload(){
+  const statusEl=document.getElementById('bulkUploadStatus');const confirmRow=document.getElementById('bulkConfirmRow');if(!_bulkParsedRows.length)return;
+  statusEl.style.display='block';statusEl.style.background='var(--purplel)';statusEl.style.color='var(--purple)';statusEl.textContent='Uploading...';confirmRow.style.display='none';
+  let added=0,updated=0,failed=0;
+  for(const row of _bulkParsedRows){try{const existing=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);if(existing.length>0){await db('inventory','PATCH',{price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'},`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);updated++;}else{await db('inventory','POST',{user_id:currentUser.id,part:row.part,price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'});added++;}}catch(e){failed++;}}
+  statusEl.textContent=`Done! ${added} added, ${updated} updated${failed?', '+failed+' failed':''}.`;statusEl.style.background='var(--greenl)';statusEl.style.color='var(--green)';
+  _bulkParsedRows=[];document.getElementById('bulkPreviewTable').innerHTML='';document.getElementById('bulkCsvInput').value='';loadSuppInv();
 }
-
-function addThinking(containerId, text) {
-  const id = 'think-' + Date.now();
-  const el = document.getElementById(containerId);
-  el.innerHTML += `<div class="msg-row" id="${id}"><div class="msg-who">Agent</div><div class="msg-bub think">${text} <span class="dots"><span></span><span></span><span></span></span></div></div>`;
-  el.scrollTop = el.scrollHeight;
-  return id;
-}
-
-function removeThing(id) { const el = document.getElementById(id); if(el) el.remove(); }
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    if (document.activeElement.id === 'bInput') { e.preventDefault(); buyerSend(); }
-    if (document.activeElement.id === 'sInput') { e.preventDefault(); suppSend(); }
-  }
-});
-
-showLanding();
-
-// ===== BULK UPLOAD =====
-let _bulkParsedRows = [];
-
-function toggleBulkPanel() {
-  const panel = document.getElementById('bulkUploadPanel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-}
-
-function downloadSampleCSV() {
-  const csv = 'part,price,stock,moq,lead\nESP32-WROOM-32E,2.80,500,10,3-5 days\nSTM32F103C8T6,2.90,1000,50,3-5 days\nATMEGA328P-PU,2.10,200,10,1 week';
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'sample_inventory.csv';
-  a.click();
-}
-
-function processBulkUpload() {
-  const file = document.getElementById('bulkCsvInput').files[0];
-  const statusEl = document.getElementById('bulkUploadStatus');
-  const previewEl = document.getElementById('bulkPreviewTable');
-  const confirmRow = document.getElementById('bulkConfirmRow');
-
-  if (!file) {
-    statusEl.style.display = 'block';
-    statusEl.style.background = 'var(--dangerl)';
-    statusEl.style.color = 'var(--danger)';
-    statusEl.textContent = 'Please select a CSV file first.';
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l);
-    if (lines.length < 2) {
-      statusEl.style.display = 'block';
-      statusEl.style.background = 'var(--dangerl)';
-      statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = 'CSV must have a header row and at least one data row.';
-      return;
-    }
-
-    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
-    const required = ['part', 'price', 'stock'];
-    const missing = required.filter(r => !headers.includes(r));
-    if (missing.length) {
-      statusEl.style.display = 'block';
-      statusEl.style.background = 'var(--dangerl)';
-      statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = 'Missing required columns: ' + missing.join(', ');
-      return;
-    }
-
-    _bulkParsedRows = lines.slice(1).map(line => {
-      const vals = line.split(',');
-      const row = {};
-      headers.forEach((h, i) => row[h] = (vals[i] || '').trim());
-      return row;
-    }).filter(r => r.part && r.price && r.stock);
-
-    if (!_bulkParsedRows.length) {
-      statusEl.style.display = 'block';
-      statusEl.style.background = 'var(--dangerl)';
-      statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = 'No valid rows found in CSV.';
-      return;
-    }
-
-    // Show preview table
-    previewEl.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;border:1px solid var(--border)">' +
-      '<thead><tr style="background:var(--off)">' +
-      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Part</th>' +
-      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Price</th>' +
-      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Stock</th>' +
-      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">MOQ</th>' +
-      '<th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)">Lead Time</th>' +
-      '</tr></thead><tbody>' +
-      _bulkParsedRows.map(r => `<tr style="border-bottom:1px solid var(--border2)">
-        <td style="padding:8px 12px;font-family:'DM Mono',monospace;font-size:12px">${r.part}</td>
-        <td style="padding:8px 12px">$${r.price}</td>
-        <td style="padding:8px 12px">${r.stock}</td>
-        <td style="padding:8px 12px">${r.moq || 1}</td>
-        <td style="padding:8px 12px">${r.lead || '—'}</td>
-      </tr>`).join('') +
-      '</tbody></table>';
-
-    statusEl.style.display = 'block';
-    statusEl.style.background = 'var(--suppl)';
-    statusEl.style.color = 'var(--supp)';
-    statusEl.textContent = `${_bulkParsedRows.length} parts ready to upload. Review below and click Confirm.`;
-    confirmRow.style.display = 'block';
-  };
-  reader.readAsText(file);
-}
-
-async function confirmBulkUpload() {
-  const statusEl = document.getElementById('bulkUploadStatus');
-  const confirmRow = document.getElementById('bulkConfirmRow');
-
-  if (!_bulkParsedRows.length) return;
-
-  statusEl.style.display = 'block';
-  statusEl.style.background = 'var(--acl)';
-  statusEl.style.color = 'var(--accent)';
-  statusEl.textContent = 'Uploading...';
-  confirmRow.style.display = 'none';
-
-  let added = 0, updated = 0, failed = 0;
-
-  for (const row of _bulkParsedRows) {
-    try {
-      const existing = await db('inventory', 'GET', null,
-        `?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);
-      if (existing.length > 0) {
-        await db('inventory', 'PATCH',
-          { price: parseFloat(row.price), stock: parseInt(row.stock), moq: parseInt(row.moq) || 1, lead: row.lead || '3-5 days' },
-          `?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);
-        updated++;
-      } else {
-        await db('inventory', 'POST', {
-          user_id: currentUser.id,
-          part: row.part,
-          price: parseFloat(row.price),
-          stock: parseInt(row.stock),
-          moq: parseInt(row.moq) || 1,
-          lead: row.lead || '3-5 days'
-        });
-        added++;
-      }
-    } catch(e) { failed++; }
-  }
-
-  statusEl.textContent = `Done! ${added} added, ${updated} updated${failed ? ', ' + failed + ' failed' : ''}.`;
-  statusEl.style.background = 'var(--suppl)';
-  statusEl.style.color = 'var(--supp)';
-  _bulkParsedRows = [];
-  document.getElementById('bulkPreviewTable').innerHTML = '';
-  document.getElementById('bulkCsvInput').value = '';
-  loadSuppInv();
-}
-
-function cancelBulkUpload() {
-  _bulkParsedRows = [];
-  document.getElementById('bulkPreviewTable').innerHTML = '';
-  document.getElementById('bulkUploadStatus').style.display = 'none';
-  document.getElementById('bulkConfirmRow').style.display = 'none';
-  document.getElementById('bulkCsvInput').value = '';
-}
-
-async function exportInvCSV() {
-  try {
-    const inv = await db('inventory', 'GET', null, `?user_id=eq.${currentUser.id}&order=id.asc`);
-    if (!inv.length) { alert('No inventory to export.'); return; }
-    const headers = 'part,price,stock,moq,lead';
-    const rows = inv.map(i => `${i.part},${i.price},${i.stock},${i.moq},${i.lead}`);
-    const csv = [headers, ...rows].join('\n');
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = 'inventory_' + new Date().toISOString().split('T')[0] + '.csv';
-    a.click();
-  } catch(e) { alert('Export failed: ' + e.message); }
-}
-
+function cancelBulkUpload(){_bulkParsedRows=[];document.getElementById('bulkPreviewTable').innerHTML='';document.getElementById('bulkUploadStatus').style.display='none';document.getElementById('bulkConfirmRow').style.display='none';document.getElementById('bulkCsvInput').value='';}
+async function exportInvCSV(){try{const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);if(!inv.length){alert('No inventory to export.');return;}const headers='part,price,stock,moq,lead';const rows=inv.map(i=>`${i.part},${i.price},${i.stock},${i.moq},${i.lead}`);const csv=[headers,...rows].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='inventory_'+new Date().toISOString().split('T')[0]+'.csv';a.click();}catch(e){alert('Export failed: '+e.message);}}
 </script>
 </body>
 </html>
