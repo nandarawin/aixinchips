@@ -368,6 +368,7 @@ tbody tr:hover td{background:var(--surface2);color:var(--text)}
         <div class="plat-tab active" onclick="bPage('chat')" id="bt-chat">My Agent</div>
         <div class="plat-tab" onclick="bPage('orders')" id="bt-orders">Orders</div>
         <div class="plat-tab" onclick="bPage('suppliers')" id="bt-suppliers">Suppliers</div>
+        <div class="plat-tab" onclick="bPage('messages')" id="bt-messages">Messages <span id="bUnreadBadge" style="display:none;background:var(--danger);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px">0</span></div>
         <div class="plat-tab" onclick="bPage('settings')" id="bt-settings">Settings</div>
       </div>
     </div>
@@ -402,6 +403,28 @@ tbody tr:hover td{background:var(--surface2);color:var(--text)}
       <div class="page-head"><div><h1>Active Suppliers</h1><p>Verified suppliers with agents on the platform</p></div></div>
       <div class="supp-cards" id="bSuppCards"><div class="empty">Loading...</div></div>
     </div>
+    <div class="plat-page" id="b-messages">
+      <div class="page-head"><div><h1>Messages</h1><p>Direct conversations with suppliers</p></div></div>
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;height:calc(100vh - 220px)">
+        <!-- Thread list -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;background:var(--surface2)">Conversations</div>
+          <div id="bThreadList" style="flex:1;overflow-y:auto"></div>
+          <div style="padding:12px 16px;border-top:1px solid var(--border)">
+            <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" onclick="openNewMsgModal('buyer')">+ New Message</button>
+          </div>
+        </div>
+        <!-- Chat area -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+          <div id="bMsgChatHead" style="padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:13px;font-weight:600;color:var(--text2)">Select a conversation</div>
+          <div id="bMsgBody" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--bg)"></div>
+          <div id="bMsgFoot" style="display:none;padding:14px 16px;border-top:1px solid var(--border);display:none;gap:10px;background:var(--surface)">
+            <textarea id="bMsgInput" class="chat-input" rows="1" placeholder="Type a message..."></textarea>
+            <button class="chat-send" onclick="sendDirectMsg('buyer')">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="plat-page" id="b-settings">
       <div class="page-head"><div><h1>Account Settings</h1></div></div>
       <div class="settings-g">
@@ -423,6 +446,7 @@ tbody tr:hover td{background:var(--surface2);color:var(--text)}
         <div class="plat-tab active s" onclick="sPage('agent')" id="st-agent">My Agent</div>
         <div class="plat-tab" onclick="sPage('inventory')" id="st-inventory">Inventory</div>
         <div class="plat-tab" onclick="sPage('requests')" id="st-requests">Requests</div>
+        <div class="plat-tab" onclick="sPage('messages')" id="st-messages">Messages <span id="sUnreadBadge" style="display:none;background:var(--danger);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px">0</span></div>
         <div class="plat-tab" onclick="sPage('settings')" id="st-settings">Settings</div>
       </div>
     </div>
@@ -484,6 +508,25 @@ tbody tr:hover td{background:var(--surface2);color:var(--text)}
     <div class="plat-page" id="s-requests">
       <div class="page-head"><div><h1>Confirmed Orders</h1><p>Orders confirmed by buyers</p></div></div>
       <div class="req-list" id="sReqList"><div class="empty">No confirmed orders yet.</div></div>
+    </div>
+    <div class="plat-page" id="s-messages">
+      <div class="page-head"><div><h1>Messages</h1><p>Direct conversations with buyers</p></div></div>
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;height:calc(100vh - 220px)">
+        <!-- Thread list -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;background:var(--surface2)">Conversations</div>
+          <div id="sThreadList" style="flex:1;overflow-y:auto"></div>
+        </div>
+        <!-- Chat area -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+          <div id="sMsgChatHead" style="padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);font-size:13px;font-weight:600;color:var(--text2)">Select a conversation</div>
+          <div id="sMsgBody" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--bg)"></div>
+          <div id="sMsgFoot" style="display:none;padding:14px 16px;border-top:1px solid var(--border);gap:10px;background:var(--surface)">
+            <textarea id="sMsgInput" class="chat-input s" rows="1" placeholder="Type a message..."></textarea>
+            <button class="chat-send s" onclick="sendDirectMsg('supplier')">Send</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="plat-page" id="s-settings">
       <div class="page-head"><div><h1>Account Settings</h1></div></div>
@@ -703,13 +746,6 @@ function loginUser(user){
   }
 }
 function logout(){currentUser=null;['buyer-shell','supplier-shell'].forEach(id=>{const el=document.getElementById(id);el.style.display='none';el.style.flexDirection='';});showLanding();}
-function bPage(p){
-  document.querySelectorAll('#buyer-shell .plat-page').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('#buyer-shell .plat-tab').forEach(el=>el.classList.remove('active'));
-  document.getElementById('b-'+p).classList.add('active');
-  const tab=document.getElementById('bt-'+p);if(tab)tab.classList.add('active');
-  if(p==='orders')loadOrders();if(p==='suppliers')loadSuppliers();
-}
 async function buyerSend(){
   const input=document.getElementById('bInput');const msg=input.value.trim();if(!msg)return;
   input.value='';addMsg('bMsgs',msg,'user',currentUser.company);
@@ -749,16 +785,7 @@ async function buyerSend(){
 async function loadOrders(){
   try{const orders=await db('orders','GET',null,`?user_id=eq.${currentUser.id}&order=created_at.desc`);const body=document.getElementById('bOrdersBody');if(!orders.length){body.innerHTML='<div class="empty">No orders yet.</div>';return;}body.innerHTML='<table><thead><tr><th>Request</th><th>Time</th><th>Status</th></tr></thead><tbody>'+orders.map(o=>`<tr><td style="font-weight:500;max-width:400px;color:var(--text)">${o.message}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:12px">${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('')+'</tbody></table>';}catch(e){}
 }
-async function loadSuppliers(){
-  try{const suppliers=await db('users','GET',null,'?type=eq.supplier');const el=document.getElementById('bSuppCards');if(!suppliers.length){el.innerHTML='<div class="empty">No suppliers yet.</div>';return;}const cards=await Promise.all(suppliers.map(async s=>{const inv=await db('inventory','GET',null,`?user_id=eq.${s.id}&order=id.asc`);const total=inv.reduce((sum,i)=>sum+i.stock,0);return `<div class="supp-card"><div class="supp-card-tag">Verified Supplier</div><h3>${s.company}</h3><p>${inv.length} parts · ${total.toLocaleString()} units total</p><div style="font-size:12px;color:var(--text3);margin-bottom:12px">${inv.slice(0,3).map(i=>i.part).join(', ')}</div><div class="supp-online"><div class="sdot s" style="width:5px;height:5px;background:var(--green)"></div>Agent Online</div></div>`;}));el.innerHTML=cards.join('');}catch(e){}
-}
-function sPage(p){
-  document.querySelectorAll('#supplier-shell .plat-page').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('#supplier-shell .plat-tab').forEach(el=>{el.classList.remove('active','s');});
-  document.getElementById('s-'+p).classList.add('active');
-  const tab=document.getElementById('st-'+p);if(tab)tab.classList.add('active','s');
-  if(p==='inventory')loadSuppInv();if(p==='requests')loadRequests();
-}
+function sPage_OLD_REMOVED(p){}
 async function suppSend(){
   const input=document.getElementById('sInput');const msg=input.value.trim();if(!msg)return;
   input.value='';addMsg('sMsgs',msg,'user',currentUser.company);
@@ -818,6 +845,184 @@ async function confirmBulkUpload(){
   for(const row of _bulkParsedRows){try{const existing=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);if(existing.length>0){await db('inventory','PATCH',{price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'},`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);updated++;}else{await db('inventory','POST',{user_id:currentUser.id,part:row.part,price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'});added++;}}catch(e){failed++;}}
   statusEl.textContent=`Done! ${added} added, ${updated} updated${failed?', '+failed+' failed':''}.`;statusEl.style.background='var(--greenl)';statusEl.style.color='var(--green)';
   _bulkParsedRows=[];document.getElementById('bulkPreviewTable').innerHTML='';document.getElementById('bulkCsvInput').value='';loadSuppInv();
+}
+
+// === DIRECT MESSAGING ===
+let activeMsgThread = null; // { otherId, otherName }
+
+// Modal for buyer to pick a supplier to message
+function openNewMsgModal(role) {
+  const existing = document.getElementById('newMsgModal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'newMsgModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;width:360px">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)">New Message</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Select a supplier to message:</div>
+    <div id="newMsgSupplierList" style="display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto"></div>
+    <button class="btn btn-outline btn-sm" style="margin-top:16px" onclick="document.getElementById('newMsgModal').remove()">Cancel</button>
+  </div>`;
+  document.body.appendChild(modal);
+  db('users','GET',null,'?type=eq.supplier').then(suppliers => {
+    const list = document.getElementById('newMsgSupplierList');
+    if (!suppliers.length) { list.innerHTML = '<div style="color:var(--text3);font-size:13px">No suppliers found.</div>'; return; }
+    suppliers.forEach(s => {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);transition:all .2s';
+      btn.onmouseover = () => btn.style.borderColor = 'var(--purple)';
+      btn.onmouseout = () => btn.style.borderColor = 'var(--border)';
+      btn.textContent = s.company;
+      btn.onclick = () => { modal.remove(); openMsgThread('buyer', s.id, s.company); };
+      list.appendChild(btn);
+    });
+  });
+}
+
+async function openMsgThread(role, otherId, otherName) {
+  activeMsgThread = { otherId, otherName };
+  const headEl = document.getElementById(role==='buyer'?'bMsgChatHead':'sMsgChatHead');
+  const bodyEl = document.getElementById(role==='buyer'?'bMsgBody':'sMsgBody');
+  const footEl = document.getElementById(role==='buyer'?'bMsgFoot':'sMsgFoot');
+  headEl.textContent = otherName;
+  bodyEl.innerHTML = '<div style="color:var(--text3);font-size:12px;font-family:JetBrains Mono,monospace">Loading...</div>';
+  footEl.style.display = 'flex';
+
+  // Mark messages as read
+  const myId = currentUser.id;
+  await db('messages','PATCH',{is_read:true},`?sender_id=eq.${otherId}&receiver_id=eq.${myId}&is_read=eq.false`);
+
+  const filter = `?or=(and(sender_id.eq.${myId},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${myId}))&order=created_at.asc`;
+  const msgs = await db('messages','GET',null,filter);
+  bodyEl.innerHTML = '';
+  if (!msgs.length) {
+    bodyEl.innerHTML = '<div style="color:var(--text3);font-size:12px;font-family:JetBrains Mono,monospace;text-align:center;margin-top:40px">No messages yet. Say hello!</div>';
+  } else {
+    msgs.forEach(m => appendMsgBubble(bodyEl, m.message, m.sender_id === myId, m.sender_id === myId ? currentUser.company : otherName));
+  }
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+  loadMsgThreads(role);
+  checkUnread();
+}
+
+function appendMsgBubble(container, text, isMe, who) {
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (isMe ? ' r' : '');
+  row.innerHTML = `<div class="msg-who">${who}</div><div class="msg-bub ${isMe?'user':'agent'}">${text}</div>`;
+  container.appendChild(row);
+}
+
+async function sendDirectMsg(role) {
+  if (!activeMsgThread) return;
+  const inputEl = document.getElementById(role==='buyer'?'bMsgInput':'sMsgInput');
+  const bodyEl = document.getElementById(role==='buyer'?'bMsgBody':'sMsgBody');
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  const myId = currentUser.id;
+  const otherId = activeMsgThread.otherId;
+  await db('messages','POST',{sender_id:myId,receiver_id:otherId,message:text,is_read:false});
+  // Remove empty state
+  const empty = bodyEl.querySelector('div[style*="No messages"]');
+  if (empty) empty.remove();
+  appendMsgBubble(bodyEl, text, true, currentUser.company);
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+  loadMsgThreads(role);
+}
+
+async function loadMsgThreads(role) {
+  const myId = currentUser.id;
+  const listEl = document.getElementById(role==='buyer'?'bThreadList':'sThreadList');
+  const allMsgs = await db('messages','GET',null,`?or=(sender_id.eq.${myId},receiver_id.eq.${myId})&order=created_at.desc`);
+  // Get unique other party IDs
+  const seen = new Set();
+  const threads = [];
+  for (const m of allMsgs) {
+    const otherId = m.sender_id === myId ? m.receiver_id : m.sender_id;
+    if (!seen.has(otherId)) { seen.add(otherId); threads.push({ otherId, lastMsg: m.message, isRead: m.is_read || m.sender_id === myId }); }
+  }
+  // Fetch names
+  const otherIds = [...seen];
+  const others = otherIds.length ? await db('users','GET',null,`?id=in.(${otherIds.join(',')})`) : [];
+  const nameMap = {};
+  others.forEach(u => nameMap[u.id] = u.company);
+
+  listEl.innerHTML = '';
+  if (!threads.length) {
+    listEl.innerHTML = '<div style="padding:20px;color:var(--text3);font-size:12px;text-align:center;font-family:JetBrains Mono,monospace">No conversations yet.</div>';
+    return;
+  }
+  threads.forEach(t => {
+    const name = nameMap[t.otherId] || 'Unknown';
+    const isActive = activeMsgThread && activeMsgThread.otherId === t.otherId;
+    const div = document.createElement('div');
+    div.style.cssText = `padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;background:${isActive?'var(--surface2)':'transparent'}`;
+    div.onmouseover = () => { if (!isActive) div.style.background = 'var(--surface2)'; };
+    div.onmouseout = () => { if (!isActive) div.style.background = 'transparent'; };
+    div.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:space-between">
+      ${name}${!t.isRead?'<span style="width:8px;height:8px;background:var(--purple);border-radius:50%;display:inline-block"></span>':''}
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px">${t.lastMsg}</div>`;
+    div.onclick = () => openMsgThread(role, t.otherId, name);
+    listEl.appendChild(div);
+  });
+}
+
+async function checkUnread() {
+  if (!currentUser) return;
+  const myId = currentUser.id;
+  const unread = await db('messages','GET',null,`?receiver_id=eq.${myId}&is_read=eq.false`);
+  const count = unread.length;
+  const badge = document.getElementById(currentUser.type==='customer'?'bUnreadBadge':'sUnreadBadge');
+  if (badge) { badge.style.display = count>0?'inline':'none'; badge.textContent = count; }
+}
+
+// Poll for new messages every 15s
+setInterval(() => { if (currentUser) { checkUnread(); if (activeMsgThread) { const role = currentUser.type==='customer'?'buyer':'supplier'; openMsgThread(role, activeMsgThread.otherId, activeMsgThread.otherName); } } }, 15000);
+
+// Patch bPage and sPage to load threads when Messages tab opened
+const _origBPage = bPage;
+function bPage(p) {
+  document.querySelectorAll('#buyer-shell .plat-page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('#buyer-shell .plat-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('b-'+p).classList.add('active');
+  const tab=document.getElementById('bt-'+p);if(tab)tab.classList.add('active');
+  if(p==='orders')loadOrders();if(p==='suppliers')loadSuppliers();
+  if(p==='messages'){loadMsgThreads('buyer');checkUnread();}
+}
+const _origSPage = sPage;
+function sPage(p) {
+  document.querySelectorAll('#supplier-shell .plat-page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('#supplier-shell .plat-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('s-'+p).classList.add('active');
+  const tab=document.getElementById('st-'+p);if(tab){tab.classList.add('active');tab.classList.add('s');}
+  if(p==='inventory')loadSuppInv();if(p==='requests')loadRequests();
+  if(p==='messages'){loadMsgThreads('supplier');checkUnread();}
+}
+
+// Also add "Message Supplier" button on supplier cards
+const _origLoadSuppliers = loadSuppliers;
+async function loadSuppliers() {
+  const g = document.getElementById('bSuppCards');
+  g.innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const suppliers = await db('users','GET',null,'?type=eq.supplier');
+    if (!suppliers.length) { g.innerHTML = '<div class="empty">No suppliers yet.</div>'; return; }
+    g.innerHTML = suppliers.map(s => `<div class="supp-card">
+      <div class="supp-card-tag">Verified Supplier</div>
+      <h3>${s.company}</h3>
+      <p>${s.email}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="supp-online"><span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block"></span> Online</div>
+        <button class="btn btn-primary btn-sm" onclick="startMsgFromSupplierCard(${s.id},'${s.company.replace(/'/g,"\\'")}')">Message</button>
+      </div>
+    </div>`).join('');
+  } catch(e) { g.innerHTML = '<div class="empty">Failed to load suppliers.</div>'; }
+}
+
+function startMsgFromSupplierCard(suppId, suppName) {
+  bPage('messages');
+  openMsgThread('buyer', suppId, suppName);
 }
 function cancelBulkUpload(){_bulkParsedRows=[];document.getElementById('bulkPreviewTable').innerHTML='';document.getElementById('bulkUploadStatus').style.display='none';document.getElementById('bulkConfirmRow').style.display='none';document.getElementById('bulkCsvInput').value='';}
 async function exportInvCSV(){try{const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);if(!inv.length){alert('No inventory to export.');return;}const headers='part,price,stock,moq,lead';const rows=inv.map(i=>`${i.part},${i.price},${i.stock},${i.moq},${i.lead}`);const csv=[headers,...rows].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='inventory_'+new Date().toISOString().split('T')[0]+'.csv';a.click();}catch(e){alert('Export failed: '+e.message);}}
