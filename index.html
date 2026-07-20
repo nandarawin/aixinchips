@@ -6,6 +6,9 @@
 <title>Aixinchips — AI Procurement Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#0d1117;
@@ -687,18 +690,38 @@ tbody tr:hover td{background:var(--surface2);color:var(--text)}
   draw();
 })();
 
-// === APP LOGIC ===
-const SUPABASE_URL = 'https://qkgpjhnmnsdtwpmlrimk.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_a-VHc3ic2kpkFUmSZazuXQ_A-RLHpWd';
+// === APP LOGIC (Firebase) ===
+const firebaseConfig = {
+  apiKey: "AIzaSyCprDnIPUl6vVQKVlvoS4ixAcsqEuXwhFw",
+  authDomain: "aixinchips.firebaseapp.com",
+  projectId: "aixinchips",
+  storageBucket: "aixinchips.firebasestorage.app",
+  messagingSenderId: "676835600820",
+  appId: "1:676835600820:web:58ec712e8f383f3142aae1"
+};
+firebase.initializeApp(firebaseConfig);
+const fauth = firebase.auth();
+const fdb = firebase.firestore();
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx--KCBexJTOLoLcoCKuKHF3yS1kOFnQx7C2wgx9qBS_6UhQR9Vzi2WE7MHhkwEjJqZ/exec';
 let currentUser=null,userType='customer',authMode='signup',buyerHistory=[];
 
-async function db(table,method='GET',body=null,filter=''){
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`,{method,headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Prefer':method==='POST'?'return=representation':''},body:body?JSON.stringify(body):null});
-  const text=await res.text(); return text?JSON.parse(text):[];
+// --- Firestore helpers ---
+async function fsGet(col,wheres){
+  let q=fdb.collection(col);
+  for(const w of (wheres||[])) q=q.where(w[0],w[1],w[2]);
+  const snap=await q.get();
+  return snap.docs.map(d=>({id:d.id,...d.data()}));
 }
+function sortAsc(rows){return rows.sort((a,b)=>(a.created_at||0)-(b.created_at||0));}
+function sortDesc(rows){return rows.sort((a,b)=>(b.created_at||0)-(a.created_at||0));}
+async function fsAdd(col,data){const rec={...data,created_at:Date.now()};const ref=await fdb.collection(col).add(rec);return {id:ref.id,...rec};}
+async function fsUpdate(col,id,data){await fdb.collection(col).doc(id).update(data);}
+async function fsGetInventory(uid){return sortAsc(await fsGet('inventory',[['user_id','==',uid]]));}
+async function fsGetUserDoc(uid){const d=await fdb.collection('users').doc(uid).get();return d.exists?{id:d.id,...d.data()}:null;}
+
 async function claude(systemPrompt,messages){
-  const res=await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({systemPrompt,messages:Array.isArray(messages)?messages:[{role:'user',content:messages}]})});
+  const idToken=fauth.currentUser?await fauth.currentUser.getIdToken():null;
+  const res=await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({idToken,systemPrompt,messages:Array.isArray(messages)?messages:[{role:'user',content:messages}]})});
   const data=await res.json(); if(data.error)throw new Error(data.error); return data.reply;
 }
 function showLanding(){
@@ -733,13 +756,25 @@ async function handleAuth(){
   if(authMode==='login'){await doLogin(email,pw,userType);}
   else{
     if(!company){showErr('Please enter your company name.');return;}
-    try{const existing=await db('users','GET',null,`?email=eq.${encodeURIComponent(email)}`);if(existing.length>0){showErr('Email already registered.');return;}const users=await db('users','POST',{type:userType,company,email,password:pw});loginUser(users[0]);}
-    catch(e){showErr('Signup failed: '+e.message);}
+    if(pw.length<6){showErr('Password must be at least 6 characters.');return;}
+    try{
+      const cred=await fauth.createUserWithEmailAndPassword(email,pw);
+      const profile={type:userType,role:userType==='customer'?'buyer':'supplier',company,email,created_at:Date.now()};
+      await fdb.collection('users').doc(cred.user.uid).set(profile);
+      loginUser({id:cred.user.uid,...profile});
+    }
+    catch(e){showErr(e.code==='auth/email-already-in-use'?'Email already registered.':'Signup failed: '+e.message);}
   }
 }
 async function doLogin(email,pw,type){
-  try{const users=await db('users','GET',null,`?email=eq.${encodeURIComponent(email)}&password=eq.${encodeURIComponent(pw)}&type=eq.${type}`);if(users.length>0)loginUser(users[0]);else showErr('Invalid email or password.');}
-  catch(e){showErr('Login failed: '+e.message);}
+  try{
+    const cred=await fauth.signInWithEmailAndPassword(email,pw);
+    const u=await fsGetUserDoc(cred.user.uid);
+    if(!u){await fauth.signOut();showErr('Account profile not found. Please sign up again.');return;}
+    if(u.type!==type){await fauth.signOut();showErr(type==='supplier'?'This is a buyer account. Use the buyer sign-in.':'This is a supplier account. Use the supplier sign-in.');return;}
+    loginUser(u);
+  }
+  catch(e){showErr(['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-login-credentials'].includes(e.code)?'Invalid email or password.':'Login failed: '+e.message);}
 }
 function showErr(msg){const el=document.getElementById('authErr');el.textContent=msg;el.style.display='block';}
 function loginUser(user){
@@ -775,15 +810,15 @@ function loginUser(user){
     loadSuppInv();
   }
 }
-function logout(){currentUser=null;['buyer-shell','supplier-shell'].forEach(id=>{const el=document.getElementById(id);el.style.display='none';el.style.flexDirection='';});showLanding();}
+function logout(){fauth.signOut();currentUser=null;['buyer-shell','supplier-shell'].forEach(id=>{const el=document.getElementById(id);el.style.display='none';el.style.flexDirection='';});showLanding();}
 async function buyerSend(){
   const input=document.getElementById('bInput');const msg=input.value.trim();if(!msg)return;
   input.value='';addMsg('bMsgs',msg,'user',currentUser.company);
   document.getElementById('bSendBtn').disabled=true;
   const tid=addThinking('bMsgs','Contacting supplier agents');
   try{
-    const suppliers=await db('users','GET',null,'?type=eq.supplier');
-    const invParts=await Promise.all(suppliers.map(async s=>{const inv=await db('inventory','GET',null,`?user_id=eq.${s.id}&order=id.asc`);if(!inv.length)return null;return `Supplier: ${s.company}\n${inv.map(i=>`  - ${i.part}: $${i.price}/unit, ${i.stock} units, MOQ ${i.moq}, lead ${i.lead}${i.stock===0?' (OUT OF STOCK)':''}`).join('\n')}`;}));
+    const suppliers=await fsGet('users',[['type','==','supplier']]);
+    const invParts=await Promise.all(suppliers.map(async s=>{const inv=await fsGetInventory(s.id);if(!inv.length)return null;return `Supplier: ${s.company}\n${inv.map(i=>`  - ${i.part}: $${i.price}/unit, ${i.stock} units, MOQ ${i.moq}, lead ${i.lead}${i.stock===0?' (OUT OF STOCK)':''}`).join('\n')}`;}));
     const suppContext=invParts.filter(Boolean).join('\n\n');
     const supplierNames=suppliers.map(s=>s.company).join(', ');
     const systemPrompt=`You are a professional AI procurement agent on the Aixinchips platform.\n\nSupplier network:\n${suppContext||'No suppliers active yet.'}\n\nExact supplier company names: ${supplierNames||'(none)'}\n\nWhen buyer asks for components:\n1. Check which suppliers have the item in stock\n2. Present clear quotes: supplier name, unit price, total cost, stock, lead time\n3. Recommend the best option\n4. Ask the buyer to reply "confirm" to place the order\n\nWHEN THE BUYER AGREES TO PLACE AN ORDER (says confirm, yes, ok, proceed, etc.) AND a specific item, quantity, and supplier are known, you MUST include this exact hidden block at the very END of your reply (the buyer will not see it):\n<order_confirmed>\n{"part":"EXACT PART NAME","qty":NUMBER,"unit_price":NUMBER,"total":NUMBER,"supplier":"EXACT SUPPLIER COMPANY NAME FROM THE LIST ABOVE"}\n</order_confirmed>\nUse a real number for total (qty × unit_price), no currency symbols inside the JSON. Only include this block when you are actually confirming a real order with a known item, qty, and supplier. Never include it while still asking the buyer questions.\n\nBe professional and concise.`;
@@ -794,7 +829,7 @@ async function buyerSend(){
     const orderMatch=reply.match(/<order_confirmed>([\s\S]*?)<\/order_confirmed>/);
     const cleanReply=reply.replace(/<order_confirmed>[\s\S]*?<\/order_confirmed>/g,'').trim();
     removeThing(tid);addMsg('bMsgs',cleanReply,'agent','Agent');
-    if(msg.toLowerCase().match(/need|want|order|require/)){await db('orders','POST',{user_id:currentUser.id,message:msg,reply:cleanReply,status:'Quote Received'});}
+    if(msg.toLowerCase().match(/need|want|order|require/)){await fsAdd('orders',{user_id:currentUser.id,message:msg,reply:cleanReply,status:'Quote Received'});}
     if(orderMatch){
       // === Reliable path: structured JSON from the agent ===
       let od=null;
@@ -861,7 +896,7 @@ async function buyerSend(){
   document.getElementById('bSendBtn').disabled=false;
 }
 async function loadOrders(){
-  try{const orders=await db('orders','GET',null,`?user_id=eq.${currentUser.id}&order=created_at.desc`);const body=document.getElementById('bOrdersBody');if(!orders.length){body.innerHTML='<div class="empty">No orders yet.</div>';return;}body.innerHTML='<table><thead><tr><th>Request</th><th>Time</th><th>Status</th></tr></thead><tbody>'+orders.map(o=>`<tr><td style="font-weight:500;max-width:400px;color:var(--text)">${o.message}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:12px">${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('')+'</tbody></table>';}catch(e){}
+  try{const orders=sortDesc(await fsGet('orders',[['user_id','==',currentUser.id]]));const body=document.getElementById('bOrdersBody');if(!orders.length){body.innerHTML='<div class="empty">No orders yet.</div>';return;}body.innerHTML='<table><thead><tr><th>Request</th><th>Time</th><th>Status</th></tr></thead><tbody>'+orders.map(o=>`<tr><td style="font-weight:500;max-width:400px;color:var(--text)">${o.message}</td><td style="font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:12px">${new Date(o.created_at).toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}</td><td><span class="tag gold">${o.status}</span></td></tr>`).join('')+'</tbody></table>';}catch(e){}
 }
 function sPage_OLD_REMOVED(p){}
 async function saveBuyerAddress(){
@@ -870,7 +905,7 @@ async function saveBuyerAddress(){
   const address=document.getElementById('bsAddress').value.trim();
   if(!address){alert('Please enter a delivery address.');return;}
   try{
-    await db('users','PATCH',{contact_name,phone,address},`?id=eq.${currentUser.id}`);
+    await fsUpdate('users',currentUser.id,{contact_name,phone,address});
     currentUser.contact_name=contact_name;currentUser.phone=phone;currentUser.address=address;
     const m=document.getElementById('bsAddrMsg');m.style.display='block';setTimeout(()=>m.style.display='none',2500);
   }catch(e){alert('Could not save address: '+e.message);}
@@ -897,7 +932,7 @@ async function saveSupplierPaynow(){
     id=id.toUpperCase();
   }
   try{
-    await db('users','PATCH',{paynow_id:id,paynow_name:name},`?id=eq.${currentUser.id}`);
+    await fsUpdate('users',currentUser.id,{paynow_id:id,paynow_name:name});
     currentUser.paynow_id=id;currentUser.paynow_name=name;
     const m=document.getElementById('ssPayMsg');m.style.display='block';setTimeout(()=>m.style.display='none',2500);
   }catch(e){alert('Could not save: '+e.message);}
@@ -995,8 +1030,7 @@ async function renderPaynowQR(){
   statusEl.textContent='Loading supplier PayNow...';
   try{
     // Fetch fresh supplier record to get paynow details
-    const rows=await db('users','GET',null,`?id=eq.${order.supplier.id}`);
-    const supp=rows[0]||{};
+    const supp=(await fsGetUserDoc(order.supplier.id))||{};
     if(!supp.paynow_id){
       statusEl.innerHTML='<span style="color:var(--orange)">This supplier hasn\'t set up PayNow yet. Please choose Card, or contact the supplier.</span>';
       return;
@@ -1040,7 +1074,7 @@ async function submitPayment(order){
       payStatus='Awaiting Confirmation';
       confirmMsg='📲 PayNow order '+order.order_ref+' placed. Once you complete the transfer in your banking app, '+order.supplier.company+' will confirm receipt and ship to:\n'+address;
     }
-    await db('requests','POST',{
+    await fsAdd('requests',{
       supplier_id:order.supplier.id,customer:currentUser.company,buyer_email:currentUser.email,
       part:order.part,qty:order.qty,status:'confirmed',order_ref:order.order_ref,total:order.total,
       buyer_company:currentUser.company,
@@ -1057,7 +1091,7 @@ async function suppSend(){
   input.value='';addMsg('sMsgs',msg,'user',currentUser.company);
   const tid=addThinking('sMsgs','Processing');
   try{
-    const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);
+    const inv=await fsGetInventory(currentUser.id);
     const systemPrompt=`You are a supplier agent on the Aixinchips procurement platform.\nCurrent inventory: ${JSON.stringify(inv)}\n\nWhen supplier tells you about stock, respond with an inventory update block AND a friendly confirmation.\n\nUse this exact format:\n<inventory_update>\n{"action":"add_or_update","part":"PART_NAME","price":0.00,"stock":0,"moq":0,"lead":"X-Y days"}\n</inventory_update>\n\nFor out of stock: <inventory_update>{"action":"out_of_stock","part":"PART_NAME"}</inventory_update>\nFor price update: <inventory_update>{"action":"price_update","part":"PART_NAME","price":0.00}</inventory_update>\nFor show: <inventory_update>{"action":"show"}</inventory_update>\n\nBe professional and confirm what you understood.`;
     const reply=await claude(systemPrompt,msg);
     const updateMatch=reply.match(/<inventory_update>([\s\S]*?)<\/inventory_update>/);
@@ -1065,10 +1099,10 @@ async function suppSend(){
     if(updateMatch){
       try{
         const update=JSON.parse(updateMatch[1].trim());
-        if(update.action==='add_or_update'){const existing=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(update.part)}`);if(existing.length>0){await db('inventory','PATCH',{price:update.price,stock:update.stock,moq:update.moq||10,lead:update.lead||'3-5 days'},`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(update.part)}`);}else{await db('inventory','POST',{user_id:currentUser.id,part:update.part,price:update.price,stock:update.stock,moq:update.moq||10,lead:update.lead||'3-5 days'});}}
-        else if(update.action==='out_of_stock'){await db('inventory','PATCH',{stock:0},`?user_id=eq.${currentUser.id}&part=ilike.*${encodeURIComponent(update.part)}*`);}
-        else if(update.action==='price_update'){await db('inventory','PATCH',{price:update.price},`?user_id=eq.${currentUser.id}&part=ilike.*${encodeURIComponent(update.part)}*`);}
-        else if(update.action==='show'){const current=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);cleanReply=current.length===0?'Your inventory is empty.':'Your inventory:\n\n'+current.map(i=>`• ${i.part}: $${i.price}/unit, ${i.stock.toLocaleString()} units, lead ${i.lead}`).join('\n');}
+        if(update.action==='add_or_update'){const existing=await fsGet('inventory',[['user_id','==',currentUser.id],['part','==',update.part]]);if(existing.length>0){await fsUpdate('inventory',existing[0].id,{price:update.price,stock:update.stock,moq:update.moq||10,lead:update.lead||'3-5 days'});}else{await fsAdd('inventory',{user_id:currentUser.id,part:update.part,price:update.price,stock:update.stock,moq:update.moq||10,lead:update.lead||'3-5 days'});}}
+        else if(update.action==='out_of_stock'){const inv2=await fsGetInventory(currentUser.id);const hits=inv2.filter(i=>String(i.part).toLowerCase().includes(String(update.part).toLowerCase()));await Promise.all(hits.map(i=>fsUpdate('inventory',i.id,{stock:0})));}
+        else if(update.action==='price_update'){const inv3=await fsGetInventory(currentUser.id);const hits=inv3.filter(i=>String(i.part).toLowerCase().includes(String(update.part).toLowerCase()));await Promise.all(hits.map(i=>fsUpdate('inventory',i.id,{price:update.price})));}
+        else if(update.action==='show'){const current=await fsGetInventory(currentUser.id);cleanReply=current.length===0?'Your inventory is empty.':'Your inventory:\n\n'+current.map(i=>`• ${i.part}: $${i.price}/unit, ${i.stock.toLocaleString()} units, lead ${i.lead}`).join('\n');}
         loadSuppInv();
       }catch(e){console.log('Inventory parse error:',e);}
     }
@@ -1076,13 +1110,13 @@ async function suppSend(){
   }catch(e){removeThing(tid);addMsg('sMsgs','Unable to reach agent: '+e.message,'agent','Agent');}
 }
 async function loadSuppInv(){
-  try{const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);document.getElementById('sTotP').textContent=inv.length;document.getElementById('sTotU').textContent=inv.reduce((s,i)=>s+i.stock,0).toLocaleString();const grid=document.getElementById('sInvGrid');if(!inv.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">No inventory yet. Go to My Agent and tell it what you have in stock.</div>';return;}grid.innerHTML=inv.map(i=>`<div class="inv-card"><div class="inv-part">${i.part}</div><div class="inv-price">$${i.price}</div><div class="inv-detail">MOQ ${i.moq} · Lead ${i.lead}</div><div class="inv-avail${i.stock===0?' low':''}">${i.stock===0?'⚠ Out of stock':'● '+i.stock.toLocaleString()+' units'}</div></div>`).join('');}catch(e){}
+  try{const inv=await fsGetInventory(currentUser.id);document.getElementById('sTotP').textContent=inv.length;document.getElementById('sTotU').textContent=inv.reduce((s,i)=>s+i.stock,0).toLocaleString();const grid=document.getElementById('sInvGrid');if(!inv.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">No inventory yet. Go to My Agent and tell it what you have in stock.</div>';return;}grid.innerHTML=inv.map(i=>`<div class="inv-card"><div class="inv-part">${i.part}</div><div class="inv-price">$${i.price}</div><div class="inv-detail">MOQ ${i.moq} · Lead ${i.lead}</div><div class="inv-avail${i.stock===0?' low':''}">${i.stock===0?'⚠ Out of stock':'● '+i.stock.toLocaleString()+' units'}</div></div>`).join('');}catch(e){}
 }
 async function loadRequests(){
-  try{const reqs=await db('requests','GET',null,`?supplier_id=eq.${currentUser.id}&order=id.desc`);document.getElementById('sTotR').textContent=reqs.length;const el=document.getElementById('sReqList');if(!reqs.length){el.innerHTML='<div class="empty">No confirmed orders yet.</div>';return;}el.innerHTML=reqs.map(r=>`<div class="req-card" style="flex-direction:column;align-items:stretch;gap:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div class="req-info"><h4>${r.part} × ${r.qty}</h4><p>${r.order_ref} · ${r.buyer_company}</p></div><div style="display:flex;align-items:center;gap:12px"><div style="font-size:13px;font-weight:600;color:var(--green)">${r.total}</div><span class="tag green">${r.status}</span>${r.payment_status?`<span class="tag ${r.payment_status==='Paid'?'green':'gold'}">${r.payment_status}${r.payment_method?' · '+r.payment_method:''}</span>`:''}${r.payment_status==='Awaiting Confirmation'?`<button class="btn btn-supp btn-sm" onclick="markPaid('${r.id}')">Mark as Paid</button>`:''}</div></div>${r.ship_address?`<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:4px">Deliver To</div><div style="color:var(--text);font-weight:500">${r.ship_contact||r.buyer_company}${r.ship_phone?' · '+r.ship_phone:''}</div><div style="white-space:pre-wrap">${r.ship_address}</div></div>`:''}</div>`).join('');}catch(e){}
+  try{const reqs=sortDesc(await fsGet('requests',[['supplier_id','==',currentUser.id]]));document.getElementById('sTotR').textContent=reqs.length;const el=document.getElementById('sReqList');if(!reqs.length){el.innerHTML='<div class="empty">No confirmed orders yet.</div>';return;}el.innerHTML=reqs.map(r=>`<div class="req-card" style="flex-direction:column;align-items:stretch;gap:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div class="req-info"><h4>${r.part} × ${r.qty}</h4><p>${r.order_ref} · ${r.buyer_company}</p></div><div style="display:flex;align-items:center;gap:12px"><div style="font-size:13px;font-weight:600;color:var(--green)">${r.total}</div><span class="tag green">${r.status}</span>${r.payment_status?`<span class="tag ${r.payment_status==='Paid'?'green':'gold'}">${r.payment_status}${r.payment_method?' · '+r.payment_method:''}</span>`:''}${r.payment_status==='Awaiting Confirmation'?`<button class="btn btn-supp btn-sm" onclick="markPaid('${r.id}')">Mark as Paid</button>`:''}</div></div>${r.ship_address?`<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:4px">Deliver To</div><div style="color:var(--text);font-weight:500">${r.ship_contact||r.buyer_company}${r.ship_phone?' · '+r.ship_phone:''}</div><div style="white-space:pre-wrap">${r.ship_address}</div></div>`:''}</div>`).join('');}catch(e){}
 }
 async function markPaid(reqId){
-  try{await db('requests','PATCH',{payment_status:'Paid'},`?id=eq.${reqId}`);loadRequests();}
+  try{await fsUpdate('requests',reqId,{payment_status:'Paid'});loadRequests();}
   catch(e){alert('Could not update: '+e.message);}
 }
 function addMsg(containerId,text,type,who){const el=document.getElementById(containerId);const div=document.createElement('div');div.className='msg-row'+(type==='user'?' r':'');div.innerHTML=`<div class="msg-who">${who}</div><div class="msg-bub ${type}">${text.replace(/\n/g,'<br>')}</div>`;el.appendChild(div);el.scrollTop=el.scrollHeight;}
@@ -1112,7 +1146,7 @@ async function confirmBulkUpload(){
   const statusEl=document.getElementById('bulkUploadStatus');const confirmRow=document.getElementById('bulkConfirmRow');if(!_bulkParsedRows.length)return;
   statusEl.style.display='block';statusEl.style.background='var(--purplel)';statusEl.style.color='var(--purple)';statusEl.textContent='Uploading...';confirmRow.style.display='none';
   let added=0,updated=0,failed=0;
-  for(const row of _bulkParsedRows){try{const existing=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);if(existing.length>0){await db('inventory','PATCH',{price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'},`?user_id=eq.${currentUser.id}&part=eq.${encodeURIComponent(row.part)}`);updated++;}else{await db('inventory','POST',{user_id:currentUser.id,part:row.part,price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'});added++;}}catch(e){failed++;}}
+  for(const row of _bulkParsedRows){try{const existing=await fsGet('inventory',[['user_id','==',currentUser.id],['part','==',row.part]]);if(existing.length>0){await fsUpdate('inventory',existing[0].id,{price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'});updated++;}else{await fsAdd('inventory',{user_id:currentUser.id,part:row.part,price:parseFloat(row.price),stock:parseInt(row.stock),moq:parseInt(row.moq)||1,lead:row.lead||'3-5 days'});added++;}}catch(e){failed++;}}
   statusEl.textContent=`Done! ${added} added, ${updated} updated${failed?', '+failed+' failed':''}.`;statusEl.style.background='var(--greenl)';statusEl.style.color='var(--green)';
   _bulkParsedRows=[];document.getElementById('bulkPreviewTable').innerHTML='';document.getElementById('bulkCsvInput').value='';loadSuppInv();
 }
@@ -1134,7 +1168,7 @@ function openNewMsgModal(role) {
     <button class="btn btn-outline btn-sm" style="margin-top:16px" onclick="document.getElementById('newMsgModal').remove()">Cancel</button>
   </div>`;
   document.body.appendChild(modal);
-  db('users','GET',null,'?type=eq.supplier').then(suppliers => {
+  fsGet('users',[['type','==','supplier']]).then(suppliers => {
     const list = document.getElementById('newMsgSupplierList');
     if (!suppliers.length) { list.innerHTML = '<div style="color:var(--text3);font-size:13px">No suppliers found.</div>'; return; }
     suppliers.forEach(s => {
@@ -1160,10 +1194,12 @@ async function openMsgThread(role, otherId, otherName) {
 
   // Mark messages as read
   const myId = currentUser.id;
-  await db('messages','PATCH',{is_read:true},`?sender_id=eq.${otherId}&receiver_id=eq.${myId}&is_read=eq.false`);
+  const _rd=await fsGet('messages',[['sender_id','==',otherId],['receiver_id','==',myId],['is_read','==',false]]);
+  await Promise.all(_rd.map(m=>fsUpdate('messages',m.id,{is_read:true})));
 
-  const filter = `?or=(and(sender_id.eq.${myId},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${myId}))&order=created_at.asc`;
-  const msgs = await db('messages','GET',null,filter);
+  const _sentC = await fsGet('messages',[['sender_id','==',myId],['receiver_id','==',otherId]]);
+  const _recvC = await fsGet('messages',[['sender_id','==',otherId],['receiver_id','==',myId]]);
+  const msgs = sortAsc(_sentC.concat(_recvC));
   bodyEl.innerHTML = '';
   if (!msgs.length) {
     bodyEl.innerHTML = '<div style="color:var(--text3);font-size:12px;font-family:JetBrains Mono,monospace;text-align:center;margin-top:40px">No messages yet. Say hello!</div>';
@@ -1191,7 +1227,7 @@ async function sendDirectMsg(role) {
   inputEl.value = '';
   const myId = currentUser.id;
   const otherId = activeMsgThread.otherId;
-  await db('messages','POST',{sender_id:myId,receiver_id:otherId,message:text,is_read:false});
+  await fsAdd('messages',{sender_id:myId,receiver_id:otherId,message:text,is_read:false});
   // Remove empty state
   const empty = bodyEl.querySelector('div[style*="No messages"]');
   if (empty) empty.remove();
@@ -1203,7 +1239,9 @@ async function sendDirectMsg(role) {
 async function loadMsgThreads(role) {
   const myId = currentUser.id;
   const listEl = document.getElementById(role==='buyer'?'bThreadList':'sThreadList');
-  const allMsgs = await db('messages','GET',null,`?or=(sender_id.eq.${myId},receiver_id.eq.${myId})&order=created_at.desc`);
+  const _sentT = await fsGet('messages',[['sender_id','==',myId]]);
+  const _recvT = await fsGet('messages',[['receiver_id','==',myId]]);
+  const allMsgs = sortDesc(_sentT.concat(_recvT));
   // Get unique other party IDs
   const seen = new Set();
   const threads = [];
@@ -1213,7 +1251,7 @@ async function loadMsgThreads(role) {
   }
   // Fetch names
   const otherIds = [...seen];
-  const others = otherIds.length ? await db('users','GET',null,`?id=in.(${otherIds.join(',')})`) : [];
+  const others = otherIds.length ? (await Promise.all(otherIds.map(id=>fsGetUserDoc(id)))).filter(Boolean) : [];
   const nameMap = {};
   others.forEach(u => nameMap[u.id] = u.company);
 
@@ -1241,7 +1279,7 @@ async function loadMsgThreads(role) {
 async function checkUnread() {
   if (!currentUser) return;
   const myId = currentUser.id;
-  const unread = await db('messages','GET',null,`?receiver_id=eq.${myId}&is_read=eq.false`);
+  const unread = await fsGet('messages',[['receiver_id','==',myId],['is_read','==',false]]);
   const count = unread.length;
   const badge = document.getElementById(currentUser.type==='customer'?'bUnreadBadge':'sUnreadBadge');
   if (badge) { badge.style.display = count>0?'inline':'none'; badge.textContent = count; }
@@ -1276,7 +1314,7 @@ async function loadSuppliers() {
   const g = document.getElementById('bSuppCards');
   g.innerHTML = '<div class="empty">Loading...</div>';
   try {
-    const suppliers = await db('users','GET',null,'?type=eq.supplier');
+    const suppliers = await fsGet('users',[['type','==','supplier']]);
     if (!suppliers.length) { g.innerHTML = '<div class="empty">No suppliers yet.</div>'; return; }
     g.innerHTML = suppliers.map(s => `<div class="supp-card">
       <div class="supp-card-tag">Verified Supplier</div>
@@ -1284,7 +1322,7 @@ async function loadSuppliers() {
       <p>${s.email}</p>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div class="supp-online"><span style="width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block"></span> Online</div>
-        <button class="btn btn-primary btn-sm" onclick="startMsgFromSupplierCard(${s.id},'${s.company.replace(/'/g,"\\'")}')">Message</button>
+        <button class="btn btn-primary btn-sm" onclick="startMsgFromSupplierCard('${s.id}','${s.company.replace(/'/g,"\\'")}')">Message</button>
       </div>
     </div>`).join('');
   } catch(e) { g.innerHTML = '<div class="empty">Failed to load suppliers.</div>'; }
@@ -1295,7 +1333,7 @@ function startMsgFromSupplierCard(suppId, suppName) {
   openMsgThread('buyer', suppId, suppName);
 }
 function cancelBulkUpload(){_bulkParsedRows=[];document.getElementById('bulkPreviewTable').innerHTML='';document.getElementById('bulkUploadStatus').style.display='none';document.getElementById('bulkConfirmRow').style.display='none';document.getElementById('bulkCsvInput').value='';}
-async function exportInvCSV(){try{const inv=await db('inventory','GET',null,`?user_id=eq.${currentUser.id}&order=id.asc`);if(!inv.length){alert('No inventory to export.');return;}const headers='part,price,stock,moq,lead';const rows=inv.map(i=>`${i.part},${i.price},${i.stock},${i.moq},${i.lead}`);const csv=[headers,...rows].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='inventory_'+new Date().toISOString().split('T')[0]+'.csv';a.click();}catch(e){alert('Export failed: '+e.message);}}
+async function exportInvCSV(){try{const inv=await fsGetInventory(currentUser.id);if(!inv.length){alert('No inventory to export.');return;}const headers='part,price,stock,moq,lead';const rows=inv.map(i=>`${i.part},${i.price},${i.stock},${i.moq},${i.lead}`);const csv=[headers,...rows].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='inventory_'+new Date().toISOString().split('T')[0]+'.csv';a.click();}catch(e){alert('Export failed: '+e.message);}}
 </script>
 
 <!-- WhatsApp Bubble -->
